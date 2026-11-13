@@ -100,7 +100,7 @@
     }
     .admin textarea { width: 100%; min-height: 5rem; resize: vertical; }
     .stack { display: grid; gap: 0.55rem; margin-bottom: 1rem; }
-    .admin button, .gate button, .text-button {
+    .admin button, .gate button, .cropper button, .text-button {
       font-family: "Fredoka", sans-serif;
       font-weight: 600;
       font-size: 0.95rem;
@@ -131,6 +131,74 @@
     .piece-copy { flex: 1; min-width: 12rem; }
     .piece-copy p { margin: 0.15rem 0 0; color: #6f675f; }
     .actions { display: flex; gap: 0.4rem; }
+    .hint { margin: 0; color: #6f675f; font-size: 0.92rem; }
+    #piece-image,
+    #piece-form .hint,
+    #crop-preview { flex-basis: 100%; }
+    .crop-preview { display: flex; align-items: center; gap: 0.75rem; }
+    .crop-preview[hidden] { display: none; }
+    .crop-preview img {
+      width: 72px;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border: 3px solid #1c1a17;
+      background: #f7f1e6;
+    }
+    .cropper {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+      background: rgba(28, 26, 23, 0.62);
+    }
+    .cropper[hidden] { display: none; }
+    .cropper-card {
+      width: min(26rem, 100%);
+      display: grid;
+      justify-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 1.2rem 1.1rem;
+      text-align: center;
+      background: #fff;
+      border: 3px solid #1c1a17;
+      border-radius: 22px;
+      box-shadow: 6px 6px 0 #1c1a17;
+    }
+    .cropper-card h2 { margin: 0; font-size: 1.45rem; }
+    .cropper-card p { margin: 0; color: #6f675f; }
+    .crop-stage {
+      height: min(360px, 52vh);
+      aspect-ratio: 2 / 3;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+      background: #1c1a17;
+      box-shadow:
+        0 0 0 8px #5c1520,
+        0 0 0 14px #e7c56a,
+        0 0 0 16px #1c1a17;
+    }
+    .crop-stage.is-dragging { cursor: grabbing; }
+    .crop-stage img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      max-width: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .crop-zoom-label {
+      width: min(240px, 80vw);
+      display: grid;
+      gap: 0.3rem;
+      text-align: left;
+      font-weight: 600;
+      color: #1c1a17;
+    }
+    .crop-zoom { width: 100%; accent-color: #1c1a17; }
   </style>
 </head>
 <body>
@@ -170,6 +238,11 @@
         <input id="piece-collection" placeholder="Collection" maxlength="80">
         <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
         <input id="piece-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        <p class="hint">Choosing a picture opens a 2:3 crop to confirm.</p>
+        <div class="crop-preview" id="crop-preview" hidden>
+          <img id="crop-preview-img" alt="">
+          <button type="button" id="crop-again" class="quiet">Adjust crop</button>
+        </div>
         <div class="row">
           <button type="submit" id="piece-save">Add art</button>
           <button type="button" id="piece-cancel" class="quiet" hidden>Cancel</button>
@@ -177,6 +250,22 @@
       </form>
       <div class="list" id="piece-list"></div>
   </main>
+  <div class="cropper" id="cropper" hidden>
+    <div class="cropper-card" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+      <h2 id="crop-title">Crop to 2:3</h2>
+      <p>Drag to move. Slide to zoom, then confirm.</p>
+      <div class="crop-stage" id="crop-stage">
+        <img id="crop-image" alt="">
+      </div>
+      <label class="crop-zoom-label">Zoom
+        <input class="crop-zoom" id="crop-zoom" type="range" min="1" max="4" step="0.01" value="1">
+      </label>
+      <div class="row">
+        <button type="button" id="crop-confirm">Use this crop</button>
+        <button type="button" id="crop-cancel" class="quiet">Cancel</button>
+      </div>
+    </div>
+  </div>
   <script>
     const notice = document.getElementById("notice");
     const gateNotice = document.getElementById("gate-notice");
@@ -188,7 +277,256 @@
     const pieceList = document.getElementById("piece-list");
     const artistSelect = document.getElementById("piece-artist");
     const collectionInput = document.getElementById("piece-collection");
+    const cropper = document.getElementById("cropper");
+    const cropStage = document.getElementById("crop-stage");
+    const cropImage = document.getElementById("crop-image");
+    const cropZoom = document.getElementById("crop-zoom");
+    const cropPreview = document.getElementById("crop-preview");
+    const cropPreviewImg = document.getElementById("crop-preview-img");
     let artists = [];
+    let croppedFile = null;
+    let previewUrl = "";
+    let crop = null;
+    let cropSnapshot = null;
+
+    function stageSize() {
+      const rect = cropStage.getBoundingClientRect();
+      return { w: rect.width, h: rect.height };
+    }
+
+    function loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("That image couldn't be opened."));
+        image.src = url;
+      });
+    }
+
+    function coverScale(image) {
+      const { w, h } = stageSize();
+      return Math.max(w / image.naturalWidth, h / image.naturalHeight);
+    }
+
+    function clampCrop() {
+      const { w, h } = stageSize();
+      const width = crop.image.naturalWidth * crop.scale;
+      const height = crop.image.naturalHeight * crop.scale;
+      crop.x = Math.min(0, Math.max(w - width, crop.x));
+      crop.y = Math.min(0, Math.max(h - height, crop.y));
+    }
+
+    function paintCrop() {
+      const width = crop.image.naturalWidth * crop.scale;
+      const height = crop.image.naturalHeight * crop.scale;
+      cropImage.style.width = width + "px";
+      cropImage.style.height = height + "px";
+      cropImage.style.transform = "translate(" + crop.x + "px, " + crop.y + "px)";
+    }
+
+    function setZoom(multiplier) {
+      const next = Math.min(4, Math.max(1, multiplier));
+      const base = coverScale(crop.image);
+      const previous = crop.scale;
+      const { w, h } = stageSize();
+      crop.scale = base * next;
+      crop.x = w / 2 - ((w / 2 - crop.x) * crop.scale / previous);
+      crop.y = h / 2 - ((h / 2 - crop.y) * crop.scale / previous);
+      clampCrop();
+      paintCrop();
+      cropZoom.value = String(next);
+    }
+
+    function centerCrop() {
+      const { w, h } = stageSize();
+      if (!w || !h) {
+        requestAnimationFrame(centerCrop);
+        return;
+      }
+      crop.scale = coverScale(crop.image);
+      crop.x = (w - crop.image.naturalWidth * crop.scale) / 2;
+      crop.y = (h - crop.image.naturalHeight * crop.scale) / 2;
+      clampCrop();
+      paintCrop();
+      cropZoom.value = "1";
+    }
+
+    function openCropper(image) {
+      const same = crop?.image === image;
+      cropSnapshot = crop ? { image: crop.image, scale: crop.scale, x: crop.x, y: crop.y, url: crop.url } : null;
+      if (!same) crop = { image, url: image.src, scale: 1, x: 0, y: 0, dragging: false };
+      cropImage.src = image.src;
+      cropper.hidden = false;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => {
+        if (same) {
+          clampCrop();
+          paintCrop();
+          cropZoom.value = String(crop.scale / coverScale(crop.image));
+        } else {
+          centerCrop();
+        }
+      });
+    }
+
+    function closeCropper(restore) {
+      cropper.hidden = true;
+      cropStage.classList.remove("is-dragging");
+      document.body.style.overflow = "";
+      const abandoned = crop;
+      if (restore) crop = cropSnapshot;
+      cropSnapshot = null;
+      return abandoned;
+    }
+
+    function showPreview(url) {
+      if (previewUrl.startsWith("blob:") && previewUrl !== url) URL.revokeObjectURL(previewUrl);
+      previewUrl = url;
+      cropPreviewImg.src = url;
+      cropPreview.hidden = false;
+    }
+
+    function clearCrop() {
+      croppedFile = null;
+      crop = null;
+      cropSnapshot = null;
+      if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+      previewUrl = "";
+      cropPreview.hidden = true;
+      cropPreviewImg.removeAttribute("src");
+    }
+
+    document.getElementById("piece-image").addEventListener("change", async () => {
+      const input = document.getElementById("piece-image");
+      const file = input.files[0];
+      input.value = "";
+      if (!file) return;
+      say("");
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) {
+        say("Use a JPG, PNG, WEBP, or GIF.");
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      try {
+        openCropper(await loadImage(url));
+      } catch (error) {
+        URL.revokeObjectURL(url);
+        say(error.message);
+      }
+    });
+
+    cropZoom.addEventListener("input", () => {
+      if (!crop) return;
+      setZoom(Number(cropZoom.value));
+    });
+
+    cropStage.addEventListener("pointerdown", (event) => {
+      if (!crop) return;
+      crop.dragging = true;
+      cropStage.classList.add("is-dragging");
+      cropStage.setPointerCapture(event.pointerId);
+      crop.pointerX = event.clientX;
+      crop.pointerY = event.clientY;
+      crop.originX = crop.x;
+      crop.originY = crop.y;
+    });
+
+    cropStage.addEventListener("pointermove", (event) => {
+      if (!crop?.dragging) return;
+      crop.x = crop.originX + (event.clientX - crop.pointerX);
+      crop.y = crop.originY + (event.clientY - crop.pointerY);
+      clampCrop();
+      paintCrop();
+    });
+
+    function stopDrag() {
+      if (!crop) return;
+      crop.dragging = false;
+      cropStage.classList.remove("is-dragging");
+    }
+    cropStage.addEventListener("pointerup", stopDrag);
+    cropStage.addEventListener("pointercancel", stopDrag);
+
+    cropStage.addEventListener("wheel", (event) => {
+      if (!crop || cropper.hidden) return;
+      event.preventDefault();
+      const current = Number(cropZoom.value) || 1;
+      setZoom(current * (event.deltaY < 0 ? 1.06 : 0.94));
+    }, { passive: false });
+
+    document.getElementById("crop-cancel").addEventListener("click", () => {
+      const abandoned = closeCropper(true);
+      if (abandoned?.url?.startsWith("blob:") && abandoned.url !== crop?.url) URL.revokeObjectURL(abandoned.url);
+    });
+
+    document.getElementById("crop-confirm").addEventListener("click", async () => {
+      const button = document.getElementById("crop-confirm");
+      if (!crop || button.disabled) return;
+      button.disabled = true;
+      const { w, h } = stageSize();
+      let sx = -crop.x / crop.scale;
+      let sy = -crop.y / crop.scale;
+      let sw = w / crop.scale;
+      let sh = h / crop.scale;
+      const visible = sw / sh;
+      if (visible > 2 / 3) {
+        const next = sh * 2 / 3;
+        sx += (sw - next) / 2;
+        sw = next;
+      } else if (visible < 2 / 3) {
+        const next = sw / (2 / 3);
+        sy += (sh - next) / 2;
+        sh = next;
+      }
+      let outW = Math.round(Math.min(1600, sw));
+      if (outW < 2) outW = 2;
+      if (outW % 2) outW -= 1;
+      const outH = Math.round(outW * 3 / 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = outW;
+      canvas.height = outH;
+      canvas.getContext("2d").drawImage(crop.image, sx, sy, sw, sh, 0, 0, outW, outH);
+      let quality = 0.92;
+      let blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      while (blob && blob.size > 3.6 * 1024 * 1024 && quality > 0.5) {
+        quality = Math.round((quality - 0.1) * 10) / 10;
+        blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      }
+      if (!blob || blob.size > 4 * 1024 * 1024) {
+        button.disabled = false;
+        say("That crop is still over 4MB. Zoom out a little and try again.");
+        return;
+      }
+      button.disabled = false;
+      const previous = cropSnapshot?.url || "";
+      croppedFile = new File([blob], "art.jpg", { type: "image/jpeg" });
+      showPreview(URL.createObjectURL(blob));
+      closeCropper(false);
+      if (previous.startsWith("blob:") && previous !== crop.url) URL.revokeObjectURL(previous);
+      say("");
+    });
+
+    document.getElementById("crop-again").addEventListener("click", async () => {
+      say("");
+      try {
+        if (crop?.image) {
+          openCropper(crop.image);
+          return;
+        }
+        if (!previewUrl) return;
+        const response = await fetch(previewUrl);
+        if (!response.ok) throw new Error("That image couldn't be opened.");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        openCropper(await loadImage(url));
+      } catch (error) {
+        say(error.message);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !cropper.hidden) document.getElementById("crop-cancel").click();
+    });
 
     function say(message) {
       const text = message || "";
@@ -266,18 +604,33 @@
     document.getElementById("piece-form").addEventListener("submit", async (event) => {
       event.preventDefault();
       const id = document.getElementById("piece-id").value;
-      const body = new FormData();
-      body.set("title", document.getElementById("piece-title").value);
-      body.set("artistId", artistSelect.value);
-      body.set("collection", collectionInput.value);
-      body.set("description", document.getElementById("piece-description").value);
-      const image = document.getElementById("piece-image").files[0];
-      if (image) body.set("image", image);
+      if (!id && !croppedFile) {
+        say("Crop the image to 2:3 before adding it.");
+        return;
+      }
       say("");
       try {
+        const payload = {
+          title: document.getElementById("piece-title").value,
+          artistId: artistSelect.value,
+          collection: collectionInput.value,
+          description: document.getElementById("piece-description").value,
+        };
+        if (croppedFile) {
+          payload.image = {
+            type: croppedFile.type,
+            data: await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result).split(",")[1]);
+              reader.onerror = () => reject(new Error("Couldn't read the crop."));
+              reader.readAsDataURL(croppedFile);
+            }),
+          };
+        }
         const data = await api(id ? "/api/admin/pieces?id=" + encodeURIComponent(id) : "/api/admin/pieces", {
           method: id ? "PATCH" : "POST",
-          body,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
         resetPiece();
         drawPieces(data.pieces);
@@ -294,6 +647,7 @@
       collectionInput.disabled = false;
       document.getElementById("piece-save").textContent = "Add art";
       document.getElementById("piece-cancel").hidden = true;
+      clearCrop();
     }
 
     function drawArtists() {
@@ -388,6 +742,8 @@
           collectionInput.value = piece.collection || "";
           document.getElementById("piece-description").value = piece.description || "";
           document.getElementById("piece-image").value = "";
+          clearCrop();
+          if (piece.imageUrl) showPreview(piece.imageUrl);
           document.getElementById("piece-save").textContent = "Save";
           document.getElementById("piece-cancel").hidden = false;
           document.getElementById("piece-title").focus();

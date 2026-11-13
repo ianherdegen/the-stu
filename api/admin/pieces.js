@@ -2,7 +2,7 @@ import crypto from "crypto";
 import Busboy from "busboy";
 import { del, put } from "@vercel/blob";
 import { db, ensureSchema } from "../lib/db.js";
-import { cleanText, json, requireAdmin } from "../lib/http.js";
+import { cleanText, json, readJson, requireAdmin } from "../lib/http.js";
 
 export const config = {
   api: { bodyParser: false },
@@ -90,7 +90,28 @@ function readForm(req) {
 async function save(req, res, existingId) {
   let form;
   try {
-    form = await readForm(req);
+    const type = req.headers["content-type"] || "";
+    if (type.includes("application/json")) {
+      const body = await readJson(req);
+      let file = null;
+      if (body.image?.data) {
+        const buffer = Buffer.from(String(body.image.data), "base64");
+        if (!buffer.length) return json(res, 400, { error: "Add an image." });
+        if (buffer.length > 4 * 1024 * 1024) return json(res, 400, { error: "Image must be under 4MB." });
+        file = { buffer, mime: body.image.type || "image/jpeg" };
+      }
+      form = {
+        fields: {
+          title: body.title,
+          artistId: body.artistId,
+          collection: body.collection,
+          description: body.description,
+        },
+        file,
+      };
+    } else {
+      form = await readForm(req);
+    }
   } catch (error) {
     return json(res, 400, { error: error.message || "Couldn't read the upload." });
   }
