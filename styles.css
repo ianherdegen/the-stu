@@ -172,11 +172,6 @@ main {
   animation: art-scroll linear infinite;
 }
 
-.marquee:hover .marquee-track,
-.marquee:focus-within .marquee-track {
-  animation-play-state: paused;
-}
-
 .marquee-set {
   display: flex;
   gap: 1.25rem;
