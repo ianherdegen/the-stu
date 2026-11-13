@@ -199,13 +199,9 @@ main {
   background: #111;
 }
 
-.opening {
-  padding: 16px;
-  background: #fff;
-}
-
 .opening:not(:has(img)) {
   aspect-ratio: 3 / 4;
+  background: #fff;
 }
 
 .opening img {
@@ -215,7 +211,6 @@ main {
   aspect-ratio: 3 / 4;
   object-fit: contain;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.22);
 }
 
 .n1::after { background:
