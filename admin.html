@@ -247,6 +247,7 @@
           <select id="piece-collection" aria-label="Collection">
             <option value="">No collection</option>
           </select>
+          <button type="button" id="collection-rename" class="quiet" hidden>Rename</button>
           <input id="piece-collection-new" placeholder="Collection" maxlength="80" hidden>
         </div>
         <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
@@ -295,6 +296,7 @@
     const artistSelect = document.getElementById("piece-artist");
     const collectionField = document.getElementById("collection-field");
     const collectionSelect = document.getElementById("piece-collection");
+    const collectionRename = document.getElementById("collection-rename");
     const collectionNew = document.getElementById("piece-collection-new");
     const NEW_COLLECTION = "__new__";
     const cropper = document.getElementById("cropper");
@@ -642,6 +644,11 @@
       return collectionNew.value;
     }
 
+    function syncCollectionRename() {
+      const current = !collectionSelect.hidden && collectionSelect.value && collectionSelect.value !== NEW_COLLECTION;
+      collectionRename.hidden = !current;
+    }
+
     function fillCollections(selected) {
       const artistId = artistSelect.value;
       const name = selected || "";
@@ -650,6 +657,7 @@
         collectionSelect.hidden = true;
         collectionNew.hidden = true;
         collectionNew.value = "";
+        syncCollectionRename();
         return;
       }
       const names = collectionsFor(artistId);
@@ -661,6 +669,7 @@
         collectionNew.hidden = false;
         collectionNew.placeholder = "Collection";
         collectionNew.value = name;
+        syncCollectionRename();
         return;
       }
       collectionSelect.append(new Option("New collection", NEW_COLLECTION));
@@ -670,11 +679,13 @@
         collectionNew.hidden = false;
         collectionNew.placeholder = "New collection";
         collectionNew.value = name;
+        syncCollectionRename();
         return;
       }
       collectionSelect.value = name;
       collectionNew.hidden = true;
       collectionNew.value = "";
+      syncCollectionRename();
     }
 
     artistSelect.addEventListener("change", () => fillCollections(""));
@@ -685,6 +696,27 @@
       collectionNew.placeholder = "New collection";
       if (!creating) collectionNew.value = "";
       else collectionNew.focus();
+      syncCollectionRename();
+    });
+
+    collectionRename.addEventListener("click", async () => {
+      const from = collectionSelect.value;
+      if (!artistSelect.value || !from || from === NEW_COLLECTION) return;
+      const next = prompt("Collection name", from);
+      if (!next || next.trim() === from) return;
+      say("");
+      try {
+        await api("/api/admin/collections", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ artistId: artistSelect.value, from, to: next }),
+        });
+        const data = await api("/api/admin/pieces");
+        drawPieces(data.pieces);
+        fillCollections(next.trim().replace(/\s+/g, " "));
+      } catch (error) {
+        say(error.message);
+      }
     });
 
     gate.addEventListener("submit", async (event) => {
