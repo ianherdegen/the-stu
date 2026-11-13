@@ -135,7 +135,13 @@
     .hint { margin: 0; color: #6f675f; font-size: 0.92rem; }
     #piece-image,
     #piece-form .hint,
-    #crop-preview { flex-basis: 100%; }
+    #crop-preview,
+    .collection-field { flex-basis: 100%; }
+    .collection-field { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+    .collection-field[hidden] { display: none; }
+    .collection-field select,
+    .collection-field input { flex: 1 1 12rem; }
+    .collection-field [hidden] { display: none; }
     .crop-preview { display: flex; align-items: center; gap: 0.75rem; }
     .crop-preview[hidden] { display: none; }
     .crop-preview img {
@@ -237,7 +243,12 @@
         <select id="piece-artist">
           <option value="">Unspecified</option>
         </select>
-        <input id="piece-collection" placeholder="Collection" maxlength="80">
+        <div class="collection-field" id="collection-field" hidden>
+          <select id="piece-collection" aria-label="Collection">
+            <option value="">No collection</option>
+          </select>
+          <input id="piece-collection-new" placeholder="Collection" maxlength="80" hidden>
+        </div>
         <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
         <input id="piece-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
         <p class="hint">Choosing a picture opens a crop at the closer of 3:4 or 4:5.</p>
@@ -282,7 +293,10 @@
     const artistList = document.getElementById("artist-list");
     const pieceList = document.getElementById("piece-list");
     const artistSelect = document.getElementById("piece-artist");
-    const collectionInput = document.getElementById("piece-collection");
+    const collectionField = document.getElementById("collection-field");
+    const collectionSelect = document.getElementById("piece-collection");
+    const collectionNew = document.getElementById("piece-collection-new");
+    const NEW_COLLECTION = "__new__";
     const cropper = document.getElementById("cropper");
     const cropStage = document.getElementById("crop-stage");
     const cropImage = document.getElementById("crop-image");
@@ -291,6 +305,7 @@
     const cropPreviewImg = document.getElementById("crop-preview-img");
     const RATIOS = { "3:4": 3 / 4, "4:5": 4 / 5 };
     let artists = [];
+    let catalog = [];
     let croppedFile = null;
     let croppedRatio = "3:4";
     let previewUrl = "";
@@ -613,10 +628,63 @@
       desk.hidden = false;
     }
 
-    artistSelect.addEventListener("change", () => {
-      const unspecified = !artistSelect.value;
-      collectionInput.disabled = unspecified;
-      if (unspecified) collectionInput.value = "";
+    function collectionsFor(artistId) {
+      const names = new Set();
+      catalog.forEach((piece) => {
+        if (piece.artistId === artistId && piece.collection) names.add(piece.collection);
+      });
+      return [...names].sort((a, b) => a.localeCompare(b));
+    }
+
+    function collectionValue() {
+      if (!artistSelect.value) return "";
+      if (!collectionSelect.hidden && collectionSelect.value !== NEW_COLLECTION) return collectionSelect.value;
+      return collectionNew.value;
+    }
+
+    function fillCollections(selected) {
+      const artistId = artistSelect.value;
+      const name = selected || "";
+      if (!artistId) {
+        collectionField.hidden = true;
+        collectionSelect.hidden = true;
+        collectionNew.hidden = true;
+        collectionNew.value = "";
+        return;
+      }
+      const names = collectionsFor(artistId);
+      collectionField.hidden = false;
+      collectionSelect.replaceChildren(new Option("No collection", ""));
+      names.forEach((item) => collectionSelect.append(new Option(item, item)));
+      if (!names.length) {
+        collectionSelect.hidden = true;
+        collectionNew.hidden = false;
+        collectionNew.placeholder = "Collection";
+        collectionNew.value = name;
+        return;
+      }
+      collectionSelect.append(new Option("New collection", NEW_COLLECTION));
+      collectionSelect.hidden = false;
+      if (name && !names.includes(name)) {
+        collectionSelect.value = NEW_COLLECTION;
+        collectionNew.hidden = false;
+        collectionNew.placeholder = "New collection";
+        collectionNew.value = name;
+        return;
+      }
+      collectionSelect.value = name;
+      collectionNew.hidden = true;
+      collectionNew.value = "";
+    }
+
+    artistSelect.addEventListener("change", () => fillCollections(""));
+
+    collectionSelect.addEventListener("change", () => {
+      const creating = collectionSelect.value === NEW_COLLECTION;
+      collectionNew.hidden = !creating;
+      collectionNew.placeholder = "New collection";
+      if (!creating) collectionNew.value = "";
+      else collectionNew.focus();
     });
 
     gate.addEventListener("submit", async (event) => {
@@ -666,12 +734,16 @@
         say("Crop the image before adding it.");
         return;
       }
+      if (artistSelect.value && !collectionSelect.hidden && collectionSelect.value === NEW_COLLECTION && !collectionNew.value.trim()) {
+        say("Name the new collection, or pick one.");
+        return;
+      }
       say("");
       try {
         const payload = {
           title: document.getElementById("piece-title").value,
           artistId: artistSelect.value,
-          collection: collectionInput.value,
+          collection: collectionValue(),
           description: document.getElementById("piece-description").value,
         };
         if (croppedFile) {
@@ -703,7 +775,7 @@
     function resetPiece() {
       document.getElementById("piece-form").reset();
       document.getElementById("piece-id").value = "";
-      collectionInput.disabled = false;
+      fillCollections("");
       document.getElementById("piece-save").textContent = "Add art";
       document.getElementById("piece-cancel").hidden = true;
       clearCrop();
@@ -712,6 +784,7 @@
     function drawArtists() {
       artistList.replaceChildren();
       const selected = artistSelect.value;
+      const keptCollection = collectionValue();
       artistSelect.replaceChildren(new Option("Unspecified", ""));
       artists.forEach((artist) => {
         artistSelect.appendChild(new Option(artist.name, artist.id));
@@ -765,10 +838,11 @@
         artistList.appendChild(row);
       });
       artistSelect.value = [...artistSelect.options].some((option) => option.value === selected) ? selected : "";
-      artistSelect.dispatchEvent(new Event("change"));
+      fillCollections(artistSelect.value === selected ? keptCollection : "");
     }
 
     function drawPieces(pieces) {
+      catalog = pieces;
       pieceList.replaceChildren();
       pieces.forEach((piece) => {
         const row = document.createElement("article");
@@ -798,8 +872,7 @@
           document.getElementById("piece-id").value = piece.id;
           document.getElementById("piece-title").value = piece.title;
           artistSelect.value = piece.artistId || "";
-          artistSelect.dispatchEvent(new Event("change"));
-          collectionInput.value = piece.collection || "";
+          fillCollections(piece.collection || "");
           document.getElementById("piece-description").value = piece.description || "";
           document.getElementById("piece-image").value = "";
           clearCrop();
@@ -835,6 +908,7 @@
         api("/api/admin/pieces"),
       ]);
       artists = artistData.artists;
+      catalog = pieceData.pieces;
       drawArtists();
       drawPieces(pieceData.pieces);
     }
