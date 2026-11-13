@@ -1,0 +1,281 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Outfit", sans-serif;
+  background: #f4efe4;
+  color: #1c1a17;
+}
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #141210;
+}
+
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(12, 10, 8, 0.28);
+  pointer-events: none;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.25rem;
+}
+
+.title {
+  margin: 0;
+  font-family: "Anybody", sans-serif;
+  font-weight: 800;
+  font-stretch: 128%;
+  font-size: clamp(3.4rem, 11vw, 8.4rem);
+  line-height: 0.86;
+  letter-spacing: 0.01em;
+}
+
+.title span {
+  display: inline-block;
+}
+
+.title .gap {
+  width: 0.18em;
+}
+
+.c1 { color: #e23b2f; transform: rotate(-4deg); }
+.c2 { color: #ffd23f; transform: rotate(3deg); }
+.c3 { color: #2f6fed; transform: rotate(-2deg); }
+.c4 { color: #ff4fa3; transform: rotate(4deg); }
+.c5 { color: #ff7a1a; transform: rotate(-3deg); }
+.c6 { color: #3ecf8e; transform: rotate(2deg); }
+
+.subtitle {
+  margin: 0.85rem 0 0;
+  font-family: "Anybody", sans-serif;
+  font-weight: 500;
+  font-stretch: 108%;
+  font-size: clamp(1.05rem, 2.2vw, 1.55rem);
+  letter-spacing: 0.16em;
+  color: #fffdf8;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
+}
+
+main {
+  background:
+    radial-gradient(900px 480px at 0% 0%, rgba(255, 244, 214, 0.75), transparent 55%),
+    radial-gradient(800px 520px at 100% 8%, rgba(184, 132, 42, 0.28), transparent 50%),
+    linear-gradient(180deg, #f3e4bc 0%, #e2c98a 42%, #f0ddb0 100%);
+  color: #2a1c0c;
+}
+
+.available {
+  width: min(1120px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 4.75rem 0 5.75rem;
+}
+
+.available h2 {
+  margin: 0 0 2.4rem;
+  font-family: "Bodoni Moda", "Times New Roman", serif;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #3a2810;
+}
+
+.available h2::after {
+  content: "";
+  display: block;
+  width: 4.5rem;
+  height: 1px;
+  margin-top: 0.7rem;
+  background: #a87428;
+  box-shadow: 0 4px 0 #a87428;
+}
+
+.artist + .artist {
+  margin-top: 3rem;
+}
+
+.artist h3 {
+  margin: 0 0 1.1rem;
+  font-family: "Bodoni Moda", "Times New Roman", serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(1.6rem, 2.6vw, 2.05rem);
+  letter-spacing: 0.04em;
+  color: #6e4c1e;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.35rem;
+}
+
+.piece {
+  margin: 0;
+}
+
+.swatch {
+  aspect-ratio: 4 / 5;
+  position: relative;
+  background:
+    linear-gradient(145deg, #fff6d2 0%, #e7c56a 14%, #a87428 34%, #f8e7b0 48%, #7a5218 66%, #e0b44a 82%, #5c3a12 100%);
+  box-shadow:
+    0 0 0 1px #3a2610,
+    inset 0 1px 0 #fff8dc,
+    inset 0 -3px 4px rgba(48, 26, 6, 0.4),
+    inset 3px 0 3px rgba(255, 244, 214, 0.35),
+    inset -3px 0 4px rgba(48, 26, 6, 0.28),
+    0 16px 24px rgba(48, 28, 8, 0.22);
+}
+
+.swatch::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px #f8ecc4,
+    inset 0 0 0 3px #2a1a0c,
+    inset 0 1px 0 rgba(255, 244, 214, 0.45);
+}
+
+.swatch::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  z-index: 1;
+  box-shadow: inset 0 0 10px rgba(36, 20, 6, 0.28);
+}
+
+.n1::after {
+  background:
+    radial-gradient(ellipse at 22% 26%, #fff1c8 0%, transparent 42%),
+    radial-gradient(ellipse at 74% 72%, #6e3c14 0%, transparent 46%),
+    linear-gradient(155deg, #f0d48a, #a56b22);
+}
+
+.n2::after {
+  background:
+    radial-gradient(ellipse at 70% 22%, #fff6dc 0%, transparent 36%),
+    radial-gradient(ellipse at 28% 76%, #4a2c10 0%, transparent 48%),
+    linear-gradient(200deg, #e8c56a, #8d5a1c);
+}
+
+.n3::after {
+  background:
+    radial-gradient(ellipse at 40% 34%, #e8b84a 0%, transparent 50%),
+    radial-gradient(ellipse at 78% 80%, #24180c 0%, transparent 34%),
+    linear-gradient(165deg, #c4893a, #5c3814);
+}
+
+.n4::after {
+  background:
+    radial-gradient(ellipse at 30% 64%, #8a4e16 0%, transparent 44%),
+    radial-gradient(ellipse at 72% 26%, #fff3d2 0%, transparent 38%),
+    linear-gradient(180deg, #f6e2aa, #b8862e);
+}
+
+.e1::after {
+  background:
+    radial-gradient(ellipse at 30% 32%, #fff8e4 0%, transparent 40%),
+    radial-gradient(ellipse at 72% 70%, #7a5a28 0%, transparent 46%),
+    linear-gradient(160deg, #efe0b0, #b8893a);
+}
+
+.e2::after {
+  background:
+    radial-gradient(ellipse at 64% 26%, #f0d48a 0%, transparent 40%),
+    radial-gradient(ellipse at 26% 74%, #3d2810 0%, transparent 46%),
+    linear-gradient(190deg, #e4c98a, #7a4e1c);
+}
+
+.e3::after {
+  background:
+    radial-gradient(ellipse at 34% 40%, #fff1c8 0%, transparent 46%),
+    radial-gradient(ellipse at 72% 76%, #a06a28 0%, transparent 40%),
+    linear-gradient(150deg, #d7b36a, #5e4016);
+}
+
+.e4::after {
+  background:
+    radial-gradient(ellipse at 68% 24%, #fffaf0 0%, transparent 32%),
+    radial-gradient(ellipse at 30% 72%, #6a4016 0%, transparent 46%),
+    linear-gradient(175deg, #f3dd96, #9a6824);
+}
+
+.piece-name,
+.piece-by {
+  margin: 0;
+}
+
+.piece-name {
+  margin-top: 0.8rem;
+  font-weight: 500;
+  font-size: 0.92rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.piece-by {
+  margin-top: 0.2rem;
+  color: #7a5a30;
+  font-weight: 300;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .title {
+    font-stretch: 115%;
+    letter-spacing: 0;
+  }
+
+  .subtitle {
+    letter-spacing: 0.08em;
+  }
+
+  .grid {
+    gap: 1rem;
+  }
+}

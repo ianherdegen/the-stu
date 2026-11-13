@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>THE STU — Art Collective</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body>
+  <header class="hero">
+    <!--
+      Hero video uses the Media Genesis format:
+      1. WebM (.webm) first
+      2. MP4 (.mp4) fallback
+      autoplay + loop + muted, with a poster image.
+      playsinline is included so phones will autoplay too.
+      Swap these URLs when the new video files are ready.
+    -->
+    <video
+      class="hero-video"
+      poster="https://mediag.com/wp-content/uploads/2018/10/Homepage-placeholder-image-for-video.jpg"
+      autoplay
+      loop
+      muted
+      playsinline
+    >
+      <source src="https://mediag.com/wp-content/themes/mg_2018/video/hero-banner.webm" type="video/webm">
+      <source src="https://mediag.com/wp-content/themes/mg_2018/video/hero-banner.mp4" type="video/mp4">
+    </video>
+
+    <div class="hero-copy">
+      <h1 class="title">
+        <span class="c1">T</span><span class="c2">H</span><span class="c3">E</span>
+        <span class="gap"></span>
+        <span class="c4">S</span><span class="c5">T</span><span class="c6">U</span>
+      </h1>
+      <p class="subtitle">Art Collective</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="available" aria-labelledby="available-heading">
+      <h2 id="available-heading">Available Art</h2>
+
+      <div class="artist">
+        <h3>Nathan</h3>
+        <ul class="grid">
+          <li>
+            <article class="piece">
+              <div class="swatch n1" role="img" aria-label="Placeholder artwork by Nathan"></div>
+              <p class="piece-name">Placeholder 1</p>
+              <p class="piece-by">Nathan</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch n2" role="img" aria-label="Placeholder artwork by Nathan"></div>
+              <p class="piece-name">Placeholder 2</p>
+              <p class="piece-by">Nathan</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch n3" role="img" aria-label="Placeholder artwork by Nathan"></div>
+              <p class="piece-name">Placeholder 3</p>
+              <p class="piece-by">Nathan</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch n4" role="img" aria-label="Placeholder artwork by Nathan"></div>
+              <p class="piece-name">Placeholder 4</p>
+              <p class="piece-by">Nathan</p>
+            </article>
+          </li>
+        </ul>
+      </div>
+
+      <div class="artist">
+        <h3>Escada</h3>
+        <ul class="grid">
+          <li>
+            <article class="piece">
+              <div class="swatch e1" role="img" aria-label="Placeholder artwork by Escada"></div>
+              <p class="piece-name">Placeholder 1</p>
+              <p class="piece-by">Escada</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch e2" role="img" aria-label="Placeholder artwork by Escada"></div>
+              <p class="piece-name">Placeholder 2</p>
+              <p class="piece-by">Escada</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch e3" role="img" aria-label="Placeholder artwork by Escada"></div>
+              <p class="piece-name">Placeholder 3</p>
+              <p class="piece-by">Escada</p>
+            </article>
+          </li>
+          <li>
+            <article class="piece">
+              <div class="swatch e4" role="img" aria-label="Placeholder artwork by Escada"></div>
+              <p class="piece-name">Placeholder 4</p>
+              <p class="piece-by">Escada</p>
+            </article>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
