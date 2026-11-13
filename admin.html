@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
   <style>
     body { background: #fff; }
     .gate-screen {
@@ -124,7 +124,7 @@
     .thumb {
       width: 64px;
       aspect-ratio: 3 / 4;
-      object-fit: cover;
+      object-fit: contain;
       border: 3px solid #1c1a17;
       background: #f7f1e6;
     }
@@ -140,7 +140,7 @@
     .crop-preview img {
       width: 72px;
       aspect-ratio: 3 / 4;
-      object-fit: cover;
+      object-fit: contain;
       border: 3px solid #1c1a17;
       background: #f7f1e6;
     }
@@ -175,11 +175,10 @@
       overflow: hidden;
       cursor: grab;
       touch-action: none;
-      background: #1c1a17;
+      background: #fff;
       box-shadow:
-        0 0 0 8px #5c1520,
-        0 0 0 14px #e7c56a,
-        0 0 0 16px #1c1a17;
+        0 0 0 14px #fff,
+        0 0 0 22px #111;
     }
     .crop-stage.is-dragging { cursor: grabbing; }
     .crop-stage img {
