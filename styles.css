@@ -218,8 +218,37 @@ main {
 }
 
 .opening {
+  position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden;
+}
+
+.watermark {
+  position: absolute;
+  inset: -35% 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin: 0;
+  pointer-events: none;
+  transform: rotate(-28deg);
+}
+
+.watermark span {
+  font-family: "Anybody", sans-serif;
+  font-weight: 800;
+  font-stretch: 118%;
+  font-size: 1.15rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.78);
+  -webkit-text-stroke: 0.45px rgba(0, 0, 0, 0.38);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .opening img {

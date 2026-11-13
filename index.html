@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
   <header class="hero">
@@ -125,6 +125,17 @@
         image.src = piece.imageUrl;
         image.alt = "";
         opening.appendChild(image);
+      }
+      if (piece.artist) {
+        const watermark = document.createElement("p");
+        watermark.className = "watermark";
+        watermark.setAttribute("aria-hidden", "true");
+        for (let line = 0; line < 4; line += 1) {
+          const name = document.createElement("span");
+          name.textContent = piece.artist;
+          watermark.appendChild(name);
+        }
+        opening.appendChild(watermark);
       }
       swatch.appendChild(opening);
       frame.appendChild(swatch);
