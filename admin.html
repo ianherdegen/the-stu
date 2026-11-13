@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=26">
+  <link rel="stylesheet" href="styles.css?v=27">
   <style>
     body { background: #fff; }
     .gate-screen {
@@ -128,6 +128,7 @@
       border: 3px solid #1c1a17;
       background: #f7f1e6;
     }
+    .thumb[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
     .piece-copy { flex: 1; min-width: 12rem; }
     .piece-copy p { margin: 0.15rem 0 0; color: #6f675f; }
     .actions { display: flex; gap: 0.4rem; }
@@ -144,6 +145,9 @@
       border: 3px solid #1c1a17;
       background: #f7f1e6;
     }
+    .crop-preview img[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
+    .ratio-choices { display: flex; gap: 0.45rem; }
+    .ratio-choices button[aria-pressed="true"] { background: #ffd23f; }
     .cropper {
       position: fixed;
       inset: 0;
@@ -178,6 +182,7 @@
       background: #fff;
       box-shadow: 0 0 0 8px #111;
     }
+    .crop-stage[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
     .crop-stage.is-dragging { cursor: grabbing; }
     .crop-stage img {
       position: absolute;
@@ -235,7 +240,7 @@
         <input id="piece-collection" placeholder="Collection" maxlength="80">
         <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
         <input id="piece-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-        <p class="hint">Choosing a picture opens a 3:4 crop to confirm.</p>
+        <p class="hint">Choosing a picture opens a crop at the closer of 3:4 or 4:5.</p>
         <div class="crop-preview" id="crop-preview" hidden>
           <img id="crop-preview-img" alt="">
           <button type="button" id="crop-again" class="quiet">Adjust crop</button>
@@ -251,6 +256,10 @@
     <div class="cropper-card" role="dialog" aria-modal="true" aria-labelledby="crop-title">
       <h2 id="crop-title">Crop to 3:4</h2>
       <p>Drag to move. Slide to zoom, then confirm.</p>
+      <div class="ratio-choices" role="group" aria-label="Ratio">
+        <button type="button" class="quiet" data-ratio-choice="3:4" aria-pressed="true">3:4</button>
+        <button type="button" class="quiet" data-ratio-choice="4:5" aria-pressed="false">4:5</button>
+      </div>
       <div class="crop-stage" id="crop-stage">
         <img id="crop-image" alt="">
       </div>
@@ -280,11 +289,28 @@
     const cropZoom = document.getElementById("crop-zoom");
     const cropPreview = document.getElementById("crop-preview");
     const cropPreviewImg = document.getElementById("crop-preview-img");
+    const RATIOS = { "3:4": 3 / 4, "4:5": 4 / 5 };
     let artists = [];
     let croppedFile = null;
+    let croppedRatio = "3:4";
     let previewUrl = "";
     let crop = null;
     let cropSnapshot = null;
+
+    function closestRatio(width, height) {
+      const value = width / height;
+      return Math.abs(value - RATIOS["3:4"]) <= Math.abs(value - RATIOS["4:5"]) ? "3:4" : "4:5";
+    }
+
+    function setRatioChrome(ratio) {
+      const next = ratio === "4:5" ? "4:5" : "3:4";
+      cropStage.dataset.ratio = next;
+      document.getElementById("crop-title").textContent = "Crop to " + next;
+      document.querySelectorAll("[data-ratio-choice]").forEach((button) => {
+        button.setAttribute("aria-pressed", button.dataset.ratioChoice === next ? "true" : "false");
+      });
+      return next;
+    }
 
     function stageSize() {
       const rect = cropStage.getBoundingClientRect();
@@ -348,10 +374,12 @@
       cropZoom.value = "1";
     }
 
-    function openCropper(image) {
+    function openCropper(image, preferred) {
       const same = crop?.image === image;
-      cropSnapshot = crop ? { image: crop.image, scale: crop.scale, x: crop.x, y: crop.y, url: crop.url } : null;
-      if (!same) crop = { image, url: image.src, scale: 1, x: 0, y: 0, dragging: false };
+      cropSnapshot = crop ? { image: crop.image, scale: crop.scale, x: crop.x, y: crop.y, url: crop.url, ratio: crop.ratio } : null;
+      const ratio = setRatioChrome(preferred || (same ? crop.ratio : closestRatio(image.naturalWidth, image.naturalHeight)));
+      if (!same) crop = { image, url: image.src, scale: 1, x: 0, y: 0, dragging: false, ratio };
+      crop.ratio = ratio;
       cropImage.src = image.src;
       cropper.hidden = false;
       document.body.style.overflow = "hidden";
@@ -366,6 +394,20 @@
       });
     }
 
+    function placeOnRatio(focus, multiplier) {
+      const { w, h } = stageSize();
+      if (!w || !h) {
+        requestAnimationFrame(() => placeOnRatio(focus, multiplier));
+        return;
+      }
+      crop.scale = coverScale(crop.image) * multiplier;
+      crop.x = w / 2 - focus.x * crop.scale;
+      crop.y = h / 2 - focus.y * crop.scale;
+      clampCrop();
+      paintCrop();
+      cropZoom.value = String(multiplier);
+    }
+
     function closeCropper(restore) {
       cropper.hidden = true;
       cropStage.classList.remove("is-dragging");
@@ -376,10 +418,11 @@
       return abandoned;
     }
 
-    function showPreview(url) {
+    function showPreview(url, ratio) {
       if (previewUrl.startsWith("blob:") && previewUrl !== url) URL.revokeObjectURL(previewUrl);
       previewUrl = url;
       cropPreviewImg.src = url;
+      cropPreviewImg.dataset.ratio = ratio === "4:5" ? "4:5" : "3:4";
       cropPreview.hidden = false;
     }
 
@@ -415,6 +458,20 @@
     cropZoom.addEventListener("input", () => {
       if (!crop) return;
       setZoom(Number(cropZoom.value));
+    });
+
+    document.querySelectorAll("[data-ratio-choice]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!crop || crop.ratio === button.dataset.ratioChoice) return;
+        const { w, h } = stageSize();
+        const focus = {
+          x: (w / 2 - crop.x) / crop.scale,
+          y: (h / 2 - crop.y) / crop.scale,
+        };
+        const multiplier = Math.min(4, Math.max(1, Number(cropZoom.value) || 1));
+        crop.ratio = setRatioChrome(button.dataset.ratioChoice);
+        requestAnimationFrame(() => placeOnRatio(focus, multiplier));
+      });
     });
 
     cropStage.addEventListener("pointerdown", (event) => {
@@ -465,20 +522,22 @@
       let sy = -crop.y / crop.scale;
       let sw = w / crop.scale;
       let sh = h / crop.scale;
+      const target = RATIOS[crop.ratio] || RATIOS["3:4"];
+      const parts = crop.ratio === "4:5" ? [4, 5] : [3, 4];
       const visible = sw / sh;
-      if (visible > 3 / 4) {
-        const next = sh * 3 / 4;
+      if (visible > target) {
+        const next = sh * target;
         sx += (sw - next) / 2;
         sw = next;
-      } else if (visible < 3 / 4) {
-        const next = sw / (3 / 4);
+      } else if (visible < target) {
+        const next = sw / target;
         sy += (sh - next) / 2;
         sh = next;
       }
       let outW = Math.round(Math.min(1600, sw));
-      outW -= outW % 3;
-      if (outW < 3) outW = 3;
-      const outH = Math.round(outW * 4 / 3);
+      outW -= outW % parts[0];
+      if (outW < parts[0]) outW = parts[0];
+      const outH = Math.round(outW * parts[1] / parts[0]);
       const canvas = document.createElement("canvas");
       canvas.width = outW;
       canvas.height = outH;
@@ -496,8 +555,9 @@
       }
       button.disabled = false;
       const previous = cropSnapshot?.url || "";
+      croppedRatio = crop.ratio === "4:5" ? "4:5" : "3:4";
       croppedFile = new File([blob], "art.jpg", { type: "image/jpeg" });
-      showPreview(URL.createObjectURL(blob));
+      showPreview(URL.createObjectURL(blob), croppedRatio);
       closeCropper(false);
       if (previous.startsWith("blob:") && previous !== crop.url) URL.revokeObjectURL(previous);
       say("");
@@ -506,8 +566,9 @@
     document.getElementById("crop-again").addEventListener("click", async () => {
       say("");
       try {
+        const preferred = cropPreviewImg.dataset.ratio;
         if (crop?.image) {
-          openCropper(crop.image);
+          openCropper(crop.image, preferred);
           return;
         }
         if (!previewUrl) return;
@@ -515,7 +576,7 @@
         if (!response.ok) throw new Error("That image couldn't be opened.");
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        openCropper(await loadImage(url));
+        openCropper(await loadImage(url), preferred);
       } catch (error) {
         say(error.message);
       }
@@ -602,7 +663,7 @@
       event.preventDefault();
       const id = document.getElementById("piece-id").value;
       if (!id && !croppedFile) {
-        say("Crop the image to 3:4 before adding it.");
+        say("Crop the image before adding it.");
         return;
       }
       say("");
@@ -614,6 +675,7 @@
           description: document.getElementById("piece-description").value,
         };
         if (croppedFile) {
+          payload.ratio = croppedRatio;
           payload.image = {
             type: croppedFile.type,
             data: await new Promise((resolve, reject) => {
@@ -714,6 +776,7 @@
         if (piece.imageUrl) {
           const image = document.createElement("img");
           image.className = "thumb";
+          image.dataset.ratio = piece.ratio === "4:5" ? "4:5" : "3:4";
           image.src = piece.imageUrl;
           image.alt = "";
           row.appendChild(image);
@@ -740,7 +803,7 @@
           document.getElementById("piece-description").value = piece.description || "";
           document.getElementById("piece-image").value = "";
           clearCrop();
-          if (piece.imageUrl) showPreview(piece.imageUrl);
+          if (piece.imageUrl) showPreview(piece.imageUrl, piece.ratio);
           document.getElementById("piece-save").textContent = "Save";
           document.getElementById("piece-cancel").hidden = false;
           document.getElementById("piece-title").focus();

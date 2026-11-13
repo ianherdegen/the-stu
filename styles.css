@@ -199,8 +199,21 @@ main {
   background: #111;
 }
 
-.opening:not(:has(img)) {
+.piece[data-ratio="4:5"] .swatch {
+  margin-top: calc((100% - 16px) / 12);
+}
+
+.opening:not(:has(img)),
+.opening img {
   aspect-ratio: 3 / 4;
+}
+
+.piece[data-ratio="4:5"] .opening:not(:has(img)),
+.piece[data-ratio="4:5"] .opening img {
+  aspect-ratio: 4 / 5;
+}
+
+.opening:not(:has(img)) {
   background: #fff;
 }
 
@@ -208,7 +221,6 @@ main {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 3 / 4;
   object-fit: contain;
   background: #fff;
 }

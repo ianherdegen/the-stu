@@ -12,7 +12,8 @@ export default async function handler(req, res) {
     const result = await db().execute(`
       SELECT p.id, p.title, COALESCE(a.name, '') AS artist,
              COALESCE(p.collection, '') AS collection,
-             p.description, COALESCE(p.image_url, '') AS image_url
+             p.description, COALESCE(p.image_url, '') AS image_url,
+             CASE WHEN p.ratio = '4:5' THEN '4:5' ELSE '3:4' END AS ratio
       FROM pieces p
       LEFT JOIN artists a ON a.id = p.artist_id
       ORDER BY p.created_at ASC, p.title ASC
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
         collection: row.collection,
         description: row.description,
         imageUrl: row.image_url,
+        ratio: row.ratio,
       })),
     });
   } catch (error) {

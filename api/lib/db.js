@@ -28,9 +28,15 @@ export function ensureSchema() {
         collection TEXT,
         description TEXT NOT NULL DEFAULT '',
         image_url TEXT,
+        ratio TEXT NOT NULL DEFAULT '3:4',
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
-    `).catch((error) => {
+    `).then(async () => {
+      const info = await db().execute("PRAGMA table_info(pieces)");
+      if (!info.rows.some((row) => row.name === "ratio")) {
+        await db().execute("ALTER TABLE pieces ADD COLUMN ratio TEXT NOT NULL DEFAULT '3:4'");
+      }
+    }).catch((error) => {
       ready = null;
       throw error;
     });

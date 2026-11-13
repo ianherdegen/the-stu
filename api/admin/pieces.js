@@ -15,6 +15,10 @@ const TYPES = {
   "image/gif": "gif",
 };
 
+function ratioOf(value) {
+  return value === "4:5" ? "4:5" : "3:4";
+}
+
 export default async function handler(req, res) {
   if (!requireAdmin(req, res)) return;
   try {
@@ -40,7 +44,8 @@ async function list(res) {
   const result = await db().execute(`
     SELECT p.id, p.title, p.artist_id, COALESCE(a.name, '') AS artist,
            COALESCE(p.collection, '') AS collection, p.description,
-           COALESCE(p.image_url, '') AS image_url
+           COALESCE(p.image_url, '') AS image_url,
+           CASE WHEN p.ratio = '4:5' THEN '4:5' ELSE '3:4' END AS ratio
     FROM pieces p
     LEFT JOIN artists a ON a.id = p.artist_id
     ORDER BY p.created_at DESC
@@ -54,6 +59,7 @@ async function list(res) {
       collection: row.collection,
       description: row.description,
       imageUrl: row.image_url,
+      ratio: row.ratio,
     })),
   });
 }
@@ -106,6 +112,7 @@ async function save(req, res, existingId) {
           artistId: body.artistId,
           collection: body.collection,
           description: body.description,
+          ratio: body.ratio,
         },
         file,
       };
@@ -131,13 +138,19 @@ async function save(req, res, existingId) {
   }
 
   let current = null;
+  let ratio = "3:4";
   if (existingId) {
-    const found = await db().execute({ sql: "SELECT image_url FROM pieces WHERE id = ?", args: [existingId] });
+    const found = await db().execute({
+      sql: "SELECT image_url, ratio FROM pieces WHERE id = ?",
+      args: [existingId],
+    });
     if (!found.rows.length) return json(res, 404, { error: "Piece not found." });
     current = found.rows[0].image_url;
+    ratio = ratioOf(found.rows[0].ratio);
   } else if (!form.file) {
     return json(res, 400, { error: "Add an image." });
   }
+  if (form.file) ratio = ratioOf(form.fields.ratio);
 
   let imageUrl = current || "";
   let uploaded = "";
@@ -161,15 +174,15 @@ async function save(req, res, existingId) {
     if (existingId) {
       await db().execute({
         sql: `UPDATE pieces
-              SET title = ?, artist_id = ?, collection = ?, description = ?, image_url = ?
+              SET title = ?, artist_id = ?, collection = ?, description = ?, image_url = ?, ratio = ?
               WHERE id = ?`,
-        args: [title, artistId || null, collection || null, description, imageUrl || null, existingId],
+        args: [title, artistId || null, collection || null, description, imageUrl || null, ratio, existingId],
       });
     } else {
       await db().execute({
-        sql: `INSERT INTO pieces (id, title, artist_id, collection, description, image_url)
-              VALUES (?, ?, ?, ?, ?, ?)`,
-        args: [crypto.randomUUID(), title, artistId || null, collection || null, description, imageUrl],
+        sql: `INSERT INTO pieces (id, title, artist_id, collection, description, image_url, ratio)
+              VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        args: [crypto.randomUUID(), title, artistId || null, collection || null, description, imageUrl, ratio],
       });
     }
   } catch (error) {
