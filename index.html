@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=19">
+  <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
   <header class="hero">
@@ -124,6 +124,12 @@
         opening.appendChild(image);
       }
       swatch.appendChild(opening);
+      ["tl", "tr", "bl", "br"].forEach((place) => {
+        const corner = document.createElement("span");
+        corner.className = "frame-corner " + place;
+        corner.setAttribute("aria-hidden", "true");
+        swatch.appendChild(corner);
+      });
       article.appendChild(swatch);
 
       const title = document.createElement("h3");
@@ -160,7 +166,7 @@
 
     function widened(list) {
       if (!list.length) return [];
-      const cardWidth = 336;
+      const cardWidth = 348;
       const view = marquee.clientWidth || window.innerWidth;
       let filled = list.slice();
       while (filled.length * cardWidth < view + cardWidth) {
