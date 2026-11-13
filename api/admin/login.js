@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return json(res, 405, { error: "Method not allowed." });
   }
 
-  if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+  if (!(process.env.ADMIN_PASSWORD || "").trim() || !(process.env.ADMIN_SESSION_SECRET || "").trim()) {
     return json(res, 500, { error: "Admin sign-in is not configured." });
   }
 

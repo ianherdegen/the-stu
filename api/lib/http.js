@@ -28,14 +28,18 @@ function cookies(req) {
   return out;
 }
 
+function sessionSecret() {
+  return (process.env.ADMIN_SESSION_SECRET || "").trim();
+}
+
 function sign(value) {
-  const mac = crypto.createHmac("sha256", process.env.ADMIN_SESSION_SECRET || "").update(value).digest("base64url");
+  const mac = crypto.createHmac("sha256", sessionSecret()).update(value).digest("base64url");
   return `${value}.${mac}`;
 }
 
 export function isAdmin(req) {
   const token = cookies(req)[COOKIE];
-  if (!token || !process.env.ADMIN_SESSION_SECRET) return false;
+  if (!token || !sessionSecret()) return false;
   const dot = token.lastIndexOf(".");
   if (dot === -1) return false;
   const value = token.slice(0, dot);
@@ -66,7 +70,7 @@ export function clearSession(res) {
 }
 
 export function passwordsMatch(input) {
-  const expected = process.env.ADMIN_PASSWORD || "";
+  const expected = (process.env.ADMIN_PASSWORD || "").trim();
   const given = String(input || "");
   const left = Buffer.from(given);
   const right = Buffer.from(expected);
