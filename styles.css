@@ -333,6 +333,43 @@ main {
   }
 }
 
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(1120px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 1.35rem 0 1.7rem;
+}
+
+.footer-mark {
+  margin: 0;
+  font-family: "Anybody", sans-serif;
+  font-weight: 800;
+  font-stretch: 120%;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+}
+
+.artist-access {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1c1a17;
+  background: #ffd23f;
+  border: 3px solid #1c1a17;
+  border-radius: 999px;
+  padding: 0.38rem 0.95rem;
+  box-shadow: 3px 3px 0 #1c1a17;
+  text-decoration: none;
+}
+
+.artist-access:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #1c1a17;
+}
+
 @media (max-width: 520px) {
   .title {
     font-stretch: 115%;

@@ -4,13 +4,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>THE STU — Admin</title>
+  <title>THE STU — Artist access</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=15">
+  <link rel="stylesheet" href="styles.css?v=16">
   <style>
     body { background: #fff; }
+    .gate-screen {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+    }
+    .gate-screen[hidden] { display: none; }
+    .gate {
+      width: min(22rem, 100%);
+      display: grid;
+      justify-items: center;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 2.1rem 1.5rem 1.5rem;
+      text-align: center;
+      background: #fff;
+      border: 3px solid #1c1a17;
+      border-radius: 22px;
+      box-shadow: 6px 6px 0 #1c1a17;
+    }
+    .gate h1 {
+      margin: 0;
+      font-family: "Anybody", sans-serif;
+      font-weight: 800;
+      font-stretch: 120%;
+      font-size: clamp(2.6rem, 8vw, 3.4rem);
+      letter-spacing: 0.02em;
+      line-height: 0.9;
+    }
+    .gate-kicker {
+      margin: 0 0 0.35rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+    }
+    .gate .note { width: 100%; }
+    .gate-back {
+      color: #6f675f;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .gate-back:hover { color: #1c1a17; }
     .admin {
       width: min(880px, calc(100% - 2rem));
       margin: 0 auto;
@@ -41,7 +84,7 @@
       gap: 0.55rem;
       align-items: center;
     }
-    .admin input, .admin select, .admin textarea {
+    .admin input, .admin select, .admin textarea, .gate input {
       font: inherit;
       color: #1c1a17;
       background: #fff;
@@ -49,9 +92,15 @@
       border-radius: 12px;
       padding: 0.4rem 0.7rem;
     }
+    .gate input {
+      width: 100%;
+      text-align: center;
+      font-size: 1.05rem;
+      padding: 0.65rem 0.8rem;
+    }
     .admin textarea { width: 100%; min-height: 5rem; resize: vertical; }
     .stack { display: grid; gap: 0.55rem; margin-bottom: 1rem; }
-    .admin button, .text-button {
+    .admin button, .gate button, .text-button {
       font-family: "Fredoka", sans-serif;
       font-weight: 600;
       font-size: 0.95rem;
@@ -82,23 +131,26 @@
     .piece-copy { flex: 1; min-width: 12rem; }
     .piece-copy p { margin: 0.15rem 0 0; color: #6f675f; }
     .actions { display: flex; gap: 0.4rem; }
-    #gate { max-width: 22rem; }
   </style>
 </head>
 <body>
-  <main class="admin">
+  <div class="gate-screen" id="gate-screen">
+    <form id="gate" class="gate">
+      <h1>THE STU</h1>
+      <p class="gate-kicker">Artist access</p>
+      <input type="password" id="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required>
+      <button type="submit">Enter</button>
+      <p class="note" id="gate-notice"></p>
+      <a class="gate-back" href="index.html">Back to the site</a>
+    </form>
+  </div>
+  <main class="admin" id="desk" hidden>
     <div class="admin-top">
       <h1>THE STU</h1>
-      <button type="button" id="logout" class="quiet" hidden>Log out</button>
+      <button type="button" id="logout" class="quiet">Log out</button>
     </div>
     <p class="note" id="notice"></p>
 
-    <form id="gate">
-      <input type="password" id="password" autocomplete="current-password" placeholder="Password" required>
-      <button type="submit">Enter</button>
-    </form>
-
-    <div id="desk" hidden>
       <h2>Artists</h2>
       <form id="artist-form" class="stack">
         <div class="row">
@@ -124,11 +176,12 @@
         </div>
       </form>
       <div class="list" id="piece-list"></div>
-    </div>
   </main>
   <script>
     const notice = document.getElementById("notice");
+    const gateNotice = document.getElementById("gate-notice");
     const gate = document.getElementById("gate");
+    const gateScreen = document.getElementById("gate-screen");
     const desk = document.getElementById("desk");
     const logout = document.getElementById("logout");
     const artistList = document.getElementById("artist-list");
@@ -137,7 +190,11 @@
     const collectionInput = document.getElementById("piece-collection");
     let artists = [];
 
-    function say(message) { notice.textContent = message || ""; }
+    function say(message) {
+      const text = message || "";
+      notice.textContent = text;
+      gateNotice.textContent = text;
+    }
 
     async function api(url, options) {
       const response = await fetch(url, options);
@@ -151,15 +208,13 @@
     }
 
     function showGate() {
-      gate.hidden = false;
+      gateScreen.hidden = false;
       desk.hidden = true;
-      logout.hidden = true;
     }
 
     function showDesk() {
-      gate.hidden = true;
+      gateScreen.hidden = true;
       desk.hidden = false;
-      logout.hidden = false;
     }
 
     artistSelect.addEventListener("change", () => {
