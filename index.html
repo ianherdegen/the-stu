@@ -6,8 +6,8 @@
   <title>THE STU — Art Collective</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
   <header class="hero">
@@ -32,87 +32,238 @@
     </video>
 
     <div class="hero-copy">
-      <h1 class="title">
-        <span class="c1">T</span><span class="c2">H</span><span class="c3">E</span>
-        <span class="gap"></span>
-        <span class="c4">S</span><span class="c5">T</span><span class="c6">U</span>
-      </h1>
+      <h1 class="title">THE STU</h1>
       <p class="subtitle">Art Collective</p>
     </div>
   </header>
 
   <main>
     <section class="available" aria-labelledby="available-heading">
-      <h2 id="available-heading">Available Art</h2>
+      <div class="available-inner">
+      <h2 id="available-heading">AVAILABLE ART</h2>
 
-      <div class="artist">
-        <h3>Nathan</h3>
-        <ul class="grid">
-          <li>
-            <article class="piece">
-              <div class="swatch n1" role="img" aria-label="Placeholder artwork by Nathan"></div>
-              <p class="piece-name">Placeholder 1</p>
-              <p class="piece-by">Nathan</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch n2" role="img" aria-label="Placeholder artwork by Nathan"></div>
-              <p class="piece-name">Placeholder 2</p>
-              <p class="piece-by">Nathan</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch n3" role="img" aria-label="Placeholder artwork by Nathan"></div>
-              <p class="piece-name">Placeholder 3</p>
-              <p class="piece-by">Nathan</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch n4" role="img" aria-label="Placeholder artwork by Nathan"></div>
-              <p class="piece-name">Placeholder 4</p>
-              <p class="piece-by">Nathan</p>
-            </article>
-          </li>
-        </ul>
+      <div class="filter-block" id="artist-block" hidden>
+        <h3 id="artists-heading">Artists</h3>
+        <div class="filters" id="artists" role="group" aria-labelledby="artists-heading"></div>
+      </div>
+      <div class="filter-block" id="collection-block" hidden>
+        <h3 id="collections-heading">Collections</h3>
+        <div id="collections"></div>
+      </div>
+      <p class="filter-empty" id="filter-empty" hidden>Nothing matches this filter.</p>
       </div>
 
-      <div class="artist">
-        <h3>Escada</h3>
-        <ul class="grid">
-          <li>
-            <article class="piece">
-              <div class="swatch e1" role="img" aria-label="Placeholder artwork by Escada"></div>
-              <p class="piece-name">Placeholder 1</p>
-              <p class="piece-by">Escada</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch e2" role="img" aria-label="Placeholder artwork by Escada"></div>
-              <p class="piece-name">Placeholder 2</p>
-              <p class="piece-by">Escada</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch e3" role="img" aria-label="Placeholder artwork by Escada"></div>
-              <p class="piece-name">Placeholder 3</p>
-              <p class="piece-by">Escada</p>
-            </article>
-          </li>
-          <li>
-            <article class="piece">
-              <div class="swatch e4" role="img" aria-label="Placeholder artwork by Escada"></div>
-              <p class="piece-name">Placeholder 4</p>
-              <p class="piece-by">Escada</p>
-            </article>
-          </li>
-        </ul>
+      <div class="marquee" id="marquee">
+        <div class="marquee-track" id="marquee-track"></div>
       </div>
     </section>
   </main>
+  <script>
+    let pieces = [];
+
+    const marquee = document.getElementById("marquee");
+    const track = document.getElementById("marquee-track");
+    const artistsEl = document.getElementById("artists");
+    const collectionsEl = document.getElementById("collections");
+    const collectionBlock = document.getElementById("collection-block");
+    const emptyNote = document.getElementById("filter-empty");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const selectedArtists = new Set();
+    const selectedCollections = new Set();
+
+    function unique(values) {
+      return [...new Set(values.filter(Boolean))];
+    }
+
+    function artists() {
+      return unique(pieces.map((piece) => piece.artist));
+    }
+
+    function collectionsFor(artist) {
+      return unique(pieces.filter((piece) => piece.artist === artist).map((piece) => piece.collection));
+    }
+
+    function collectionKey(artist, collection) {
+      return artist + "\0" + collection;
+    }
+
+    function toggle(set, value) {
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+    }
+
+    function matching() {
+      if (selectedArtists.size === 0) return pieces;
+      return pieces.filter((piece) => {
+        if (!selectedArtists.has(piece.artist)) return false;
+        const picked = collectionsFor(piece.artist).some((name) => selectedCollections.has(collectionKey(piece.artist, name)));
+        if (!picked) return true;
+        return selectedCollections.has(collectionKey(piece.artist, piece.collection));
+      });
+    }
+
+    function card(piece) {
+      const article = document.createElement("article");
+      article.className = "piece";
+
+      const swatch = document.createElement("div");
+      swatch.className = "swatch";
+      swatch.setAttribute("role", "img");
+      swatch.setAttribute("aria-label", piece.title);
+      if (piece.imageUrl) {
+        const image = document.createElement("img");
+        image.src = piece.imageUrl;
+        image.alt = "";
+        swatch.appendChild(image);
+      }
+      article.appendChild(swatch);
+
+      const title = document.createElement("h3");
+      title.className = "piece-title";
+      title.textContent = piece.title;
+      article.appendChild(title);
+
+      article.appendChild(meta("Artist", piece.artist, "None specified"));
+      article.appendChild(meta("Collection", piece.collection, "No collection"));
+
+      const description = document.createElement("p");
+      description.className = "piece-desc";
+      description.textContent = piece.description;
+      article.appendChild(description);
+      return article;
+    }
+
+    function meta(label, value, emptyText) {
+      const line = document.createElement("p");
+      line.className = "piece-meta" + (value ? "" : " is-empty");
+      const name = document.createElement("span");
+      name.textContent = label;
+      line.appendChild(name);
+      line.appendChild(document.createTextNode(value || emptyText));
+      return line;
+    }
+
+    function setOf(list) {
+      const set = document.createElement("div");
+      set.className = "marquee-set";
+      list.forEach((piece) => set.appendChild(card(piece)));
+      return set;
+    }
+
+    function widened(list) {
+      if (!list.length) return [];
+      const cardWidth = 280;
+      const view = marquee.clientWidth || window.innerWidth;
+      let filled = list.slice();
+      while (filled.length * cardWidth < view + cardWidth) {
+        filled = filled.concat(list);
+      }
+      return filled;
+    }
+
+    function renderTrack() {
+      const list = matching();
+      track.replaceChildren();
+      emptyNote.textContent = pieces.length ? "Nothing matches this filter." : "No art yet.";
+      emptyNote.hidden = list.length > 0;
+      marquee.hidden = list.length === 0;
+      if (!list.length) return;
+
+      const sequence = reduceMotion ? list : widened(list);
+      const first = setOf(sequence);
+      track.appendChild(first);
+      if (!reduceMotion) {
+        const copy = setOf(sequence);
+        copy.setAttribute("aria-hidden", "true");
+        track.appendChild(copy);
+        const seconds = Math.max(18, first.scrollWidth / 45);
+        track.style.animationDuration = seconds + "s";
+      }
+    }
+
+    function chip(label, pressed, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.setAttribute("aria-pressed", pressed ? "true" : "false");
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function renderFilters() {
+      artistsEl.replaceChildren();
+      artists().forEach((artist) => {
+        artistsEl.appendChild(chip(artist, selectedArtists.has(artist), () => {
+          toggle(selectedArtists, artist);
+          if (!selectedArtists.has(artist)) {
+            collectionsFor(artist).forEach((name) => selectedCollections.delete(collectionKey(artist, name)));
+          }
+          render();
+        }));
+      });
+
+      const chosen = artists().filter((artist) => selectedArtists.has(artist));
+      collectionBlock.hidden = chosen.length === 0;
+      collectionsEl.replaceChildren();
+      chosen.forEach((artist) => {
+        const line = document.createElement("div");
+        line.className = "artist-line";
+
+        const name = document.createElement("span");
+        name.className = "artist-line-name";
+        name.textContent = artist;
+        line.appendChild(name);
+
+        const sets = collectionsFor(artist);
+        if (!sets.length) {
+          const empty = document.createElement("span");
+          empty.className = "artist-line-empty";
+          empty.textContent = "No sets";
+          line.appendChild(empty);
+        } else {
+          const group = document.createElement("div");
+          group.className = "filters";
+          group.setAttribute("role", "group");
+          group.setAttribute("aria-label", artist + " collections");
+          sets.forEach((setName) => {
+            const key = collectionKey(artist, setName);
+            group.appendChild(chip(setName, selectedCollections.has(key), () => {
+              toggle(selectedCollections, key);
+              render();
+            }));
+          });
+          line.appendChild(group);
+        }
+
+        collectionsEl.appendChild(line);
+      });
+    }
+
+    function render() {
+      document.getElementById("artist-block").hidden = pieces.length === 0;
+      renderFilters();
+      if (!pieces.length) collectionBlock.hidden = true;
+      renderTrack();
+    }
+
+    async function loadArt() {
+      try {
+        const response = await fetch("/api/art", { cache: "no-store" });
+        if (!response.ok) throw new Error("load");
+        const data = await response.json();
+        pieces = Array.isArray(data.pieces) ? data.pieces : [];
+        render();
+      } catch (error) {
+        document.getElementById("artist-block").hidden = true;
+        collectionBlock.hidden = true;
+        marquee.hidden = true;
+        emptyNote.hidden = false;
+        emptyNote.textContent = "Art couldn't be loaded.";
+      }
+    }
+
+    loadArt();
+  </script>
 </body>
 </html>

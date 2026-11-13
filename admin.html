@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>THE STU — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <style>
+    body { background: #fff; }
+    .admin {
+      width: min(880px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0 4rem;
+    }
+    .admin-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .admin h1 {
+      margin: 0;
+      font-family: "Anybody", sans-serif;
+      font-weight: 800;
+      font-stretch: 120%;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      letter-spacing: 0.02em;
+    }
+    .admin h2 {
+      margin: 2rem 0 0.8rem;
+      font-size: 1.35rem;
+    }
+    .admin form, .row, .piece-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+    }
+    .admin input, .admin select, .admin textarea {
+      font: inherit;
+      color: #1c1a17;
+      background: #fff;
+      border: 3px solid #1c1a17;
+      border-radius: 12px;
+      padding: 0.4rem 0.7rem;
+    }
+    .admin textarea { width: 100%; min-height: 5rem; resize: vertical; }
+    .stack { display: grid; gap: 0.55rem; margin-bottom: 1rem; }
+    .admin button, .text-button {
+      font-family: "Fredoka", sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #1c1a17;
+      background: #ffd23f;
+      border: 3px solid #1c1a17;
+      border-radius: 999px;
+      padding: 0.28rem 0.85rem;
+      box-shadow: 3px 3px 0 #1c1a17;
+      cursor: pointer;
+    }
+    .quiet { background: #fff; }
+    .note { color: #a33b32; font-weight: 600; min-height: 1.2em; }
+    .list { display: grid; gap: 0.7rem; }
+    .row, .piece-row {
+      justify-content: space-between;
+      border-bottom: 2px solid #efe8dc;
+      padding-bottom: 0.7rem;
+    }
+    .piece-row { align-items: flex-start; }
+    .thumb {
+      width: 64px;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border: 3px solid #1c1a17;
+      background: #f7f1e6;
+    }
+    .piece-copy { flex: 1; min-width: 12rem; }
+    .piece-copy p { margin: 0.15rem 0 0; color: #6f675f; }
+    .actions { display: flex; gap: 0.4rem; }
+    #gate { max-width: 22rem; }
+  </style>
+</head>
+<body>
+  <main class="admin">
+    <div class="admin-top">
+      <h1>THE STU</h1>
+      <button type="button" id="logout" class="quiet" hidden>Log out</button>
+    </div>
+    <p class="note" id="notice"></p>
+
+    <form id="gate">
+      <input type="password" id="password" autocomplete="current-password" placeholder="Password" required>
+      <button type="submit">Enter</button>
+    </form>
+
+    <div id="desk" hidden>
+      <h2>Artists</h2>
+      <form id="artist-form" class="stack">
+        <div class="row">
+          <input id="artist-name" placeholder="Name" maxlength="80" required>
+          <button type="submit">Add artist</button>
+        </div>
+      </form>
+      <div class="list" id="artist-list"></div>
+
+      <h2>Art</h2>
+      <form id="piece-form" class="stack">
+        <input id="piece-id" type="hidden">
+        <input id="piece-title" placeholder="Title" maxlength="120" required>
+        <select id="piece-artist">
+          <option value="">Unspecified</option>
+        </select>
+        <input id="piece-collection" placeholder="Collection" maxlength="80">
+        <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
+        <input id="piece-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        <div class="row">
+          <button type="submit" id="piece-save">Add art</button>
+          <button type="button" id="piece-cancel" class="quiet" hidden>Cancel</button>
+        </div>
+      </form>
+      <div class="list" id="piece-list"></div>
+    </div>
+  </main>
+  <script>
+    const notice = document.getElementById("notice");
+    const gate = document.getElementById("gate");
+    const desk = document.getElementById("desk");
+    const logout = document.getElementById("logout");
+    const artistList = document.getElementById("artist-list");
+    const pieceList = document.getElementById("piece-list");
+    const artistSelect = document.getElementById("piece-artist");
+    const collectionInput = document.getElementById("piece-collection");
+    let artists = [];
+
+    function say(message) { notice.textContent = message || ""; }
+
+    async function api(url, options) {
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        showGate();
+        throw new Error(data.error || "Sign in required.");
+      }
+      if (!response.ok) throw new Error(data.error || "Something went wrong.");
+      return data;
+    }
+
+    function showGate() {
+      gate.hidden = false;
+      desk.hidden = true;
+      logout.hidden = true;
+    }
+
+    function showDesk() {
+      gate.hidden = true;
+      desk.hidden = false;
+      logout.hidden = false;
+    }
+
+    artistSelect.addEventListener("change", () => {
+      const unspecified = !artistSelect.value;
+      collectionInput.disabled = unspecified;
+      if (unspecified) collectionInput.value = "";
+    });
+
+    gate.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      say("");
+      try {
+        await api("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: document.getElementById("password").value }),
+        });
+        document.getElementById("password").value = "";
+        showDesk();
+        await refresh();
+      } catch (error) {
+        say(error.message);
+      }
+    });
+
+    logout.addEventListener("click", async () => {
+      await fetch("/api/admin/login", { method: "DELETE" });
+      showGate();
+    });
+
+    document.getElementById("artist-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = document.getElementById("artist-name");
+      say("");
+      try {
+        const data = await api("/api/admin/artists", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: input.value }),
+        });
+        input.value = "";
+        artists = data.artists;
+        drawArtists();
+      } catch (error) {
+        say(error.message);
+      }
+    });
+
+    document.getElementById("piece-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const id = document.getElementById("piece-id").value;
+      const body = new FormData();
+      body.set("title", document.getElementById("piece-title").value);
+      body.set("artistId", artistSelect.value);
+      body.set("collection", collectionInput.value);
+      body.set("description", document.getElementById("piece-description").value);
+      const image = document.getElementById("piece-image").files[0];
+      if (image) body.set("image", image);
+      say("");
+      try {
+        const data = await api(id ? "/api/admin/pieces?id=" + encodeURIComponent(id) : "/api/admin/pieces", {
+          method: id ? "PATCH" : "POST",
+          body,
+        });
+        resetPiece();
+        drawPieces(data.pieces);
+      } catch (error) {
+        say(error.message);
+      }
+    });
+
+    document.getElementById("piece-cancel").addEventListener("click", resetPiece);
+
+    function resetPiece() {
+      document.getElementById("piece-form").reset();
+      document.getElementById("piece-id").value = "";
+      collectionInput.disabled = false;
+      document.getElementById("piece-save").textContent = "Add art";
+      document.getElementById("piece-cancel").hidden = true;
+    }
+
+    function drawArtists() {
+      artistList.replaceChildren();
+      const selected = artistSelect.value;
+      artistSelect.replaceChildren(new Option("Unspecified", ""));
+      artists.forEach((artist) => {
+        artistSelect.appendChild(new Option(artist.name, artist.id));
+        const row = document.createElement("div");
+        row.className = "row";
+        const name = document.createElement("strong");
+        name.textContent = artist.name;
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const rename = document.createElement("button");
+        rename.type = "button";
+        rename.className = "quiet";
+        rename.textContent = "Rename";
+        rename.addEventListener("click", async () => {
+          const next = prompt("Name", artist.name);
+          if (!next || next.trim() === artist.name) return;
+          say("");
+          try {
+            const data = await api("/api/admin/artists", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: artist.id, name: next }),
+            });
+            artists = data.artists;
+            drawArtists();
+            const pieces = await api("/api/admin/pieces");
+            drawPieces(pieces.pieces);
+          } catch (error) {
+            say(error.message);
+          }
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "quiet";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", async () => {
+          if (!confirm("Remove " + artist.name + "? Their art stays, marked unspecified.")) return;
+          say("");
+          try {
+            const data = await api("/api/admin/artists?id=" + encodeURIComponent(artist.id), { method: "DELETE" });
+            artists = data.artists;
+            drawArtists();
+            const pieces = await api("/api/admin/pieces");
+            drawPieces(pieces.pieces);
+          } catch (error) {
+            say(error.message);
+          }
+        });
+        actions.append(rename, remove);
+        row.append(name, actions);
+        artistList.appendChild(row);
+      });
+      artistSelect.value = [...artistSelect.options].some((option) => option.value === selected) ? selected : "";
+      artistSelect.dispatchEvent(new Event("change"));
+    }
+
+    function drawPieces(pieces) {
+      pieceList.replaceChildren();
+      pieces.forEach((piece) => {
+        const row = document.createElement("article");
+        row.className = "piece-row";
+        if (piece.imageUrl) {
+          const image = document.createElement("img");
+          image.className = "thumb";
+          image.src = piece.imageUrl;
+          image.alt = "";
+          row.appendChild(image);
+        }
+        const copy = document.createElement("div");
+        copy.className = "piece-copy";
+        const title = document.createElement("strong");
+        title.textContent = piece.title;
+        const meta = document.createElement("p");
+        meta.textContent = (piece.artist || "Unspecified") + (piece.collection ? " · " + piece.collection : "");
+        copy.append(title, meta);
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "quiet";
+        edit.textContent = "Edit";
+        edit.addEventListener("click", () => {
+          document.getElementById("piece-id").value = piece.id;
+          document.getElementById("piece-title").value = piece.title;
+          artistSelect.value = piece.artistId || "";
+          artistSelect.dispatchEvent(new Event("change"));
+          collectionInput.value = piece.collection || "";
+          document.getElementById("piece-description").value = piece.description || "";
+          document.getElementById("piece-image").value = "";
+          document.getElementById("piece-save").textContent = "Save";
+          document.getElementById("piece-cancel").hidden = false;
+          document.getElementById("piece-title").focus();
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "quiet";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", async () => {
+          if (!confirm("Remove " + piece.title + "?")) return;
+          say("");
+          try {
+            const data = await api("/api/admin/pieces?id=" + encodeURIComponent(piece.id), { method: "DELETE" });
+            if (document.getElementById("piece-id").value === piece.id) resetPiece();
+            drawPieces(data.pieces);
+          } catch (error) {
+            say(error.message);
+          }
+        });
+        actions.append(edit, remove);
+        row.append(copy, actions);
+        pieceList.appendChild(row);
+      });
+    }
+
+    async function refresh() {
+      const [artistData, pieceData] = await Promise.all([
+        api("/api/admin/artists"),
+        api("/api/admin/pieces"),
+      ]);
+      artists = artistData.artists;
+      drawArtists();
+      drawPieces(pieceData.pieces);
+    }
+
+    refresh().then(showDesk).catch(() => showGate());
+  </script>
+</body>
+</html>
