@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=22">
   <style>
     body { background: #fff; }
     .gate-screen {
@@ -123,7 +123,7 @@
     .piece-row { align-items: flex-start; }
     .thumb {
       width: 64px;
-      aspect-ratio: 2 / 3;
+      aspect-ratio: 3 / 4;
       object-fit: cover;
       border: 3px solid #1c1a17;
       background: #f7f1e6;
@@ -139,7 +139,7 @@
     .crop-preview[hidden] { display: none; }
     .crop-preview img {
       width: 72px;
-      aspect-ratio: 2 / 3;
+      aspect-ratio: 3 / 4;
       object-fit: cover;
       border: 3px solid #1c1a17;
       background: #f7f1e6;
@@ -170,7 +170,7 @@
     .cropper-card p { margin: 0; color: #6f675f; }
     .crop-stage {
       height: min(360px, 52vh);
-      aspect-ratio: 2 / 3;
+      aspect-ratio: 3 / 4;
       position: relative;
       overflow: hidden;
       cursor: grab;
@@ -238,7 +238,7 @@
         <input id="piece-collection" placeholder="Collection" maxlength="80">
         <textarea id="piece-description" placeholder="Description" maxlength="2000"></textarea>
         <input id="piece-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-        <p class="hint">Choosing a picture opens a 2:3 crop to confirm.</p>
+        <p class="hint">Choosing a picture opens a 3:4 crop to confirm.</p>
         <div class="crop-preview" id="crop-preview" hidden>
           <img id="crop-preview-img" alt="">
           <button type="button" id="crop-again" class="quiet">Adjust crop</button>
@@ -252,7 +252,7 @@
   </main>
   <div class="cropper" id="cropper" hidden>
     <div class="cropper-card" role="dialog" aria-modal="true" aria-labelledby="crop-title">
-      <h2 id="crop-title">Crop to 2:3</h2>
+      <h2 id="crop-title">Crop to 3:4</h2>
       <p>Drag to move. Slide to zoom, then confirm.</p>
       <div class="crop-stage" id="crop-stage">
         <img id="crop-image" alt="">
@@ -469,19 +469,19 @@
       let sw = w / crop.scale;
       let sh = h / crop.scale;
       const visible = sw / sh;
-      if (visible > 2 / 3) {
-        const next = sh * 2 / 3;
+      if (visible > 3 / 4) {
+        const next = sh * 3 / 4;
         sx += (sw - next) / 2;
         sw = next;
-      } else if (visible < 2 / 3) {
-        const next = sw / (2 / 3);
+      } else if (visible < 3 / 4) {
+        const next = sw / (3 / 4);
         sy += (sh - next) / 2;
         sh = next;
       }
       let outW = Math.round(Math.min(1600, sw));
-      if (outW < 2) outW = 2;
-      if (outW % 2) outW -= 1;
-      const outH = Math.round(outW * 3 / 2);
+      outW -= outW % 3;
+      if (outW < 3) outW = 3;
+      const outH = Math.round(outW * 4 / 3);
       const canvas = document.createElement("canvas");
       canvas.width = outW;
       canvas.height = outH;
@@ -605,7 +605,7 @@
       event.preventDefault();
       const id = document.getElementById("piece-id").value;
       if (!id && !croppedFile) {
-        say("Crop the image to 2:3 before adding it.");
+        say("Crop the image to 3:4 before adding it.");
         return;
       }
       say("");

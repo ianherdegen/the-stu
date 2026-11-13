@@ -231,7 +231,7 @@ main {
 .opening {
   position: relative;
   z-index: 2;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   background: #f4efe4;
   box-shadow:
     0 0 0 1px #120c08,
