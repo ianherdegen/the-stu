@@ -175,6 +175,7 @@
 
     function renderTrack() {
       const list = matching();
+      track.style.animation = "none";
       track.replaceChildren();
       emptyNote.textContent = pieces.length ? "Nothing matches this filter." : "No art yet.";
       emptyNote.hidden = list.length > 0;
@@ -184,13 +185,14 @@
       const sequence = reduceMotion ? list : widened(list);
       const first = setOf(sequence);
       track.appendChild(first);
-      if (!reduceMotion) {
-        const copy = setOf(sequence);
-        copy.setAttribute("aria-hidden", "true");
-        track.appendChild(copy);
-        const seconds = Math.max(18, first.scrollWidth / 45);
-        track.style.animationDuration = seconds + "s";
-      }
+      if (reduceMotion) return;
+
+      const copy = setOf(sequence);
+      copy.setAttribute("aria-hidden", "true");
+      track.appendChild(copy);
+      const seconds = Math.max(18, first.scrollWidth / 45);
+      void track.offsetWidth;
+      track.style.animation = "art-scroll " + seconds + "s linear infinite";
     }
 
     function chip(label, pressed, onClick) {
