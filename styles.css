@@ -182,6 +182,14 @@ main {
   margin: 0;
   flex: 0 0 328px;
   width: 328px;
+  container-type: inline-size;
+}
+
+.frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(16px + (100cqi - 16px) * 4 / 3);
 }
 
 @keyframes art-scroll {
@@ -190,12 +198,9 @@ main {
 }
 
 .swatch {
+  width: 100%;
   padding: 8px;
   background: #111;
-}
-
-.piece[data-ratio="4:5"] .swatch {
-  margin-top: calc((100% - 16px) / 12);
 }
 
 .opening:not(:has(img)),
@@ -212,11 +217,17 @@ main {
   background: #fff;
 }
 
+.opening {
+  display: grid;
+  place-items: center;
+}
+
 .opening img {
   display: block;
   width: 100%;
   height: auto;
   object-fit: contain;
+  object-position: center;
   background: #fff;
 }
 
