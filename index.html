@@ -3,37 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>THE STU — Art Collective</title>
+  <title>BLUE BOY — Clubhouse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=30">
+  <link rel="stylesheet" href="styles.css?v=37">
 </head>
 <body>
   <header class="hero">
-    <!--
-      Hero video uses the Media Genesis format:
-      1. WebM (.webm) first
-      2. MP4 (.mp4) fallback
-      autoplay + loop + muted, with a poster image.
-      playsinline is included so phones will autoplay too.
-      Swap these URLs when the new video files are ready.
-    -->
     <video
       class="hero-video"
-      poster="https://mediag.com/wp-content/uploads/2018/10/Homepage-placeholder-image-for-video.jpg"
+      poster="video/hero-poster.jpg"
       autoplay
       loop
       muted
       playsinline
     >
-      <source src="https://mediag.com/wp-content/themes/mg_2018/video/hero-banner.webm" type="video/webm">
-      <source src="https://mediag.com/wp-content/themes/mg_2018/video/hero-banner.mp4" type="video/mp4">
+      <source src="video/hero.webm?v=2" type="video/webm">
+      <source src="video/hero.mp4?v=2" type="video/mp4">
     </video>
 
     <div class="hero-copy">
-      <h1 class="title">THE STU</h1>
-      <p class="subtitle">Art Collective</p>
+      <h1 class="title">BLUE BOY</h1>
+      <p class="subtitle">Clubhouse</p>
     </div>
   </header>
 
@@ -59,7 +51,7 @@
     </section>
   </main>
   <footer class="site-footer">
-    <p class="footer-mark">THE STU</p>
+    <p class="footer-mark">BLUE BOY</p>
     <a class="artist-access" href="/admin">Artist access</a>
   </footer>
   <script>

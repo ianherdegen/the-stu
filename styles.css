@@ -56,9 +56,10 @@ body {
   font-family: "Anybody", sans-serif;
   font-weight: 800;
   font-stretch: 128%;
-  font-size: clamp(3.4rem, 11vw, 8.4rem);
+  font-size: clamp(2.7rem, 9vw, 7rem);
   line-height: 0.86;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   color: #fff;
 }
 
@@ -96,7 +97,7 @@ main {
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 0.95;
-  color: #e23b2f;
+  color: #00274c;
   -webkit-text-stroke: 0.02em #1c1a17;
   paint-order: stroke fill;
 }
