@@ -1,5 +1,12 @@
+import crypto from "crypto";
 import { ensureSchema, db } from "./lib/db.js";
 import { json } from "./lib/http.js";
+
+function publicImage(row) {
+  if (!row.image_url) return "";
+  const version = crypto.createHash("sha1").update(`${row.artist}\0${row.image_url}`).digest("hex").slice(0, 10);
+  return `/api/image?id=${encodeURIComponent(row.id)}&v=${version}`;
+}
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -25,7 +32,7 @@ export default async function handler(req, res) {
         artist: row.artist,
         collection: row.collection,
         description: row.description,
-        imageUrl: row.image_url,
+        imageUrl: publicImage(row),
         ratio: row.ratio,
       })),
     });

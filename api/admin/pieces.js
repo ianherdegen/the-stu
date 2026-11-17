@@ -58,7 +58,7 @@ async function list(res) {
       artist: row.artist,
       collection: row.collection,
       description: row.description,
-      imageUrl: row.image_url,
+      imageUrl: row.image_url ? `/api/admin/file?id=${encodeURIComponent(row.id)}` : "",
       ratio: row.ratio,
     })),
   });
