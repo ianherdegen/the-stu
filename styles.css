@@ -90,7 +90,7 @@ main {
   margin: 0 auto;
 }
 
-.available h2 {
+.section-title {
   margin: 0 0 2.25rem;
   font-family: "Lilita One", sans-serif;
   font-size: clamp(2.6rem, 7vw, 4.6rem);
@@ -364,6 +364,366 @@ main {
 .artist-access:hover {
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 #1c1a17;
+}
+
+.studio-block {
+  padding: 4.5rem 0;
+}
+
+.studio-block--cream {
+  background: #f4efe4;
+}
+
+.studio-inner {
+  width: min(1120px, calc(100% - 2.5rem));
+  margin: 0 auto;
+}
+
+.amenity-grid,
+.member-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.amenity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.amenity-grid li,
+.member-offer,
+.member-notes li,
+.wishlist-empty {
+  background: #fff;
+  border: 3px solid #1c1a17;
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 #1c1a17;
+}
+
+.amenity-grid li {
+  padding: 1.15rem 1.2rem 1.2rem;
+}
+
+.amenity-grid h3,
+.member-notes h3 {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.amenity-grid p,
+.member-notes p,
+.wishlist-lead,
+.wishlist-empty {
+  margin: 0.4rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.member-layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.member-offer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 1.4rem 1.35rem;
+  background: #ffd23f;
+  text-align: center;
+}
+
+.member-kicker {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+.member-price {
+  margin: 0;
+  font-family: "Lilita One", sans-serif;
+  font-size: clamp(3.2rem, 6vw, 4.4rem);
+  line-height: 0.9;
+  color: #00274c;
+  -webkit-text-stroke: 0.015em #1c1a17;
+  paint-order: stroke fill;
+}
+
+.member-price span {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  -webkit-text-stroke: 0;
+  color: #1c1a17;
+}
+
+.member-hours {
+  margin: 0.85rem 0 0;
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+.member-guest {
+  margin: 0.2rem 0 0;
+}
+
+.member-notes {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.member-notes li {
+  padding: 1rem 1.15rem;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.65rem;
+  align-items: stretch;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.65rem 0.45rem 0.7rem;
+  background: #fff;
+  border: 3px solid #1c1a17;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 #1c1a17;
+}
+
+.day.is-open {
+  background: transparent;
+  box-shadow: none;
+}
+
+.day-events {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.day-name {
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #00274c;
+}
+
+.day.is-open .day-name {
+  color: #8a8176;
+}
+
+.cal-event {
+  min-width: 0;
+  padding: 0.45rem 0.4rem 0.5rem;
+  background: #ffd23f;
+  border: 2px solid #1c1a17;
+  border-radius: 12px;
+}
+
+.cal-event--movie {
+  background: #f07167;
+}
+
+.cal-event--gallery {
+  background: #ffd23f;
+}
+
+.cal-event--art {
+  background: #9ecae9;
+}
+
+.cal-time,
+.cal-event h3,
+.cal-note {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.cal-time {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.cal-event h3 {
+  margin-top: 0.15rem;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.cal-note {
+  margin-top: 0.28rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.cal-note a {
+  color: #00274c;
+  font-weight: 600;
+}
+
+.cal-star {
+  margin-left: 0.1em;
+  font-weight: 600;
+  text-decoration: none;
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+.week-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #6f675f;
+}
+
+.live-stage {
+  display: grid;
+  place-items: center;
+  width: min(800px, 100%);
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  padding: 1.5rem;
+  background: #141210;
+  color: #fffdf8;
+  border: 3px solid #1c1a17;
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 #1c1a17;
+  text-align: center;
+}
+
+.live-stage p {
+  margin: 0;
+  max-width: 16rem;
+  font-weight: 600;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.35;
+}
+
+@media (min-width: 1100px) {
+  .week {
+    grid-template-rows: auto auto auto;
+    column-gap: 0.65rem;
+    row-gap: 0;
+  }
+
+  .day {
+    grid-row: 1 / -1;
+    display: grid;
+    grid-template-rows: subgrid;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .day-name {
+    align-self: start;
+    margin-bottom: 1.15rem;
+  }
+
+  .day-events {
+    grid-row: 2 / span 2;
+    grid-template-rows: subgrid;
+    align-items: start;
+    gap: 0;
+  }
+
+  .cal-event--afternoon {
+    grid-row: 1;
+  }
+
+  .cal-event--late {
+    grid-row: 2;
+    margin-top: 1.15rem;
+  }
+}
+
+.wishlist-lead {
+  margin-top: -1.2rem;
+  max-width: 36rem;
+}
+
+.wishlist-list {
+  list-style: none;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.wishlist-list[hidden] {
+  display: none;
+}
+
+.wishlist-list li {
+  background: #fff;
+  border: 3px solid #1c1a17;
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 #1c1a17;
+  padding: 1.05rem 1.2rem;
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+.wishlist-empty {
+  margin-top: 1.35rem;
+  padding: 1.15rem 1.2rem;
+  color: #6f675f;
+  font-weight: 600;
+}
+
+@media (max-width: 1099px) {
+  .week {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .day {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr;
+    align-items: start;
+    gap: 0.75rem 1rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .day-name {
+    padding-top: 0.45rem;
+    text-align: left;
+  }
+
+  .day.is-open {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .amenity-grid,
+  .member-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 520px) {

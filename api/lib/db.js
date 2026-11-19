@@ -31,6 +31,11 @@ export function ensureSchema() {
         ratio TEXT NOT NULL DEFAULT '3:4',
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
+      CREATE TABLE IF NOT EXISTS wishlist (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
     `).then(async () => {
       const info = await db().execute("PRAGMA table_info(pieces)");
       if (!info.rows.some((row) => row.name === "ratio")) {

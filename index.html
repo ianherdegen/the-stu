@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=51">
 </head>
 <body>
   <header class="hero">
@@ -30,9 +30,72 @@
   </header>
 
   <main>
+    <section class="studio-block" aria-labelledby="live-heading">
+      <div class="studio-inner">
+        <h2 class="section-title" id="live-heading">LIVE AT THE STU</h2>
+        <div class="live-stage">
+          <p>When we're live, the stream plays here.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="studio-block studio-block--cream" aria-labelledby="events-heading">
+      <div class="studio-inner">
+        <h2 class="section-title" id="events-heading">PUBLIC EVENTS</h2>
+        <div class="week">
+          <section class="day" aria-label="Sunday">
+            <p class="day-name">Sun</p>
+            <div class="day-events">
+              <article class="cal-event cal-event--movie cal-event--late">
+                <p class="cal-time">9:00 PM – late<a class="cal-star" href="#event-note">*</a></p>
+                <h3>Movie Night</h3>
+                <p class="cal-note">Follow <a href="https://www.instagram.com/darklord_escada/" target="_blank" rel="noopener noreferrer">@darklord_escada</a></p>
+              </article>
+            </div>
+          </section>
+          <section class="day is-open" aria-label="Monday">
+            <p class="day-name">Mon</p>
+          </section>
+          <section class="day is-open" aria-label="Tuesday">
+            <p class="day-name">Tue</p>
+          </section>
+          <section class="day" aria-label="Wednesday">
+            <p class="day-name">Wed</p>
+            <div class="day-events">
+              <article class="cal-event cal-event--gallery cal-event--afternoon">
+                <p class="cal-time">4:00–8:00 PM<a class="cal-star" href="#event-note">*</a></p>
+                <h3>Gallery Pop-Ups</h3>
+              </article>
+              <article class="cal-event cal-event--art cal-event--late">
+                <p class="cal-time">8:00 PM – late<a class="cal-star" href="#event-note">*</a></p>
+                <h3>Art Night Detroit</h3>
+                <p class="cal-note">Follow <a href="https://www.instagram.com/artnightdetroit/" target="_blank" rel="noopener noreferrer">@artnightdetroit</a></p>
+              </article>
+            </div>
+          </section>
+          <section class="day is-open" aria-label="Thursday">
+            <p class="day-name">Thu</p>
+          </section>
+          <section class="day" aria-label="Friday">
+            <p class="day-name">Fri</p>
+            <div class="day-events">
+              <article class="cal-event cal-event--gallery cal-event--afternoon">
+                <p class="cal-time">4:00–8:00 PM<a class="cal-star" href="#event-note">*</a></p>
+                <h3>Gallery Pop-Ups</h3>
+              </article>
+            </div>
+          </section>
+          <section class="day is-open" aria-label="Saturday">
+            <p class="day-name">Sat</p>
+          </section>
+        </div>
+        <p class="week-note" id="event-note">* Unless otherwise specified</p>
+      </div>
+    </section>
+
     <section class="available" aria-labelledby="available-heading">
       <div class="available-inner">
-      <h2 id="available-heading">AVAILABLE ART</h2>
+      <h2 class="section-title" id="available-heading">AVAILABLE ART</h2>
 
       <div class="filter-block" id="artist-block" hidden>
         <h3 id="artists-heading">Artists</h3>
@@ -47,6 +110,73 @@
 
       <div class="marquee" id="marquee">
         <div class="marquee-track" id="marquee-track"></div>
+      </div>
+    </section>
+
+    <section class="studio-block studio-block--cream" aria-labelledby="amenities-heading">
+      <div class="studio-inner">
+        <h2 class="section-title" id="amenities-heading">AMENITIES</h2>
+        <ul class="amenity-grid">
+          <li>
+            <h3>Pool Table</h3>
+            <p>Rack up a game.</p>
+          </li>
+          <li>
+            <h3>Lounge Area</h3>
+            <p>Sit, hang out, and take a break.</p>
+          </li>
+          <li>
+            <h3>Coworking Desks</h3>
+            <p>Desks for getting work done.</p>
+          </li>
+          <li>
+            <h3>Workshop</h3>
+            <p>Space to make and build.</p>
+          </li>
+          <li>
+            <h3>Music Station</h3>
+            <p>A place to play music.</p>
+          </li>
+          <li>
+            <h3>Food Hub</h3>
+            <p>Fridge, microwave, toaster oven, and more.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="studio-block" aria-labelledby="membership-heading">
+      <div class="studio-inner">
+        <h2 class="section-title" id="membership-heading">MEMBERSHIP</h2>
+        <div class="member-layout">
+          <article class="member-offer">
+            <p class="member-price">$100<span>/mo</span></p>
+          </article>
+          <ul class="member-notes">
+            <li>
+              <h3>Access</h3>
+              <p>9 AM to 5 PM, Monday through Saturday</p>
+            </li>
+            <li>
+              <h3>Reserved Studio Usage</h3>
+              <p>A member can request a reservation and bring 3 approved guests.</p>
+            </li>
+            <li>
+              <h3>House rules</h3>
+              <p>Leave it better than you found it.</p>
+              <p>Be respectful of the community.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="studio-block studio-block--cream" aria-labelledby="wishlist-heading">
+      <div class="studio-inner">
+        <h2 class="section-title" id="wishlist-heading">WISHLIST</h2>
+        <p class="wishlist-lead">Things the studio is raising money for.</p>
+        <ul class="wishlist-list" id="wishlist-list" hidden></ul>
+        <p class="wishlist-empty" id="wishlist-empty" hidden>Nothing on the list yet.</p>
       </div>
     </section>
   </main>
@@ -268,7 +398,32 @@
       }
     }
 
+    async function loadWishlist() {
+      const list = document.getElementById("wishlist-list");
+      const empty = document.getElementById("wishlist-empty");
+      try {
+        const response = await fetch("/api/wishlist", { cache: "no-store" });
+        if (!response.ok) throw new Error("load");
+        const data = await response.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        list.replaceChildren();
+        items.forEach((item) => {
+          const line = document.createElement("li");
+          line.textContent = item.name;
+          list.appendChild(line);
+        });
+        list.hidden = items.length === 0;
+        empty.hidden = items.length > 0;
+        empty.textContent = "Nothing on the list yet.";
+      } catch (error) {
+        list.hidden = true;
+        empty.hidden = false;
+        empty.textContent = "The wishlist couldn't be loaded.";
+      }
+    }
+
     loadArt();
+    loadWishlist();
   </script>
 </body>
 </html>

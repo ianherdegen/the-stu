@@ -8,18 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,800&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=46">
   <style>
     body { background: #fff; }
     .gate-screen {
       min-height: 100svh;
       display: grid;
-      place-items: center;
+      align-content: center;
+      justify-items: center;
       padding: 1.5rem;
+      overflow: auto;
     }
     .gate-screen[hidden] { display: none; }
-    .gate {
+    .gate-layout {
       width: min(22rem, 100%);
+      display: grid;
+      gap: 1.15rem;
+    }
+    .gate {
+      width: 100%;
       display: grid;
       justify-items: center;
       gap: 0.75rem;
@@ -54,6 +61,30 @@
       text-decoration: none;
     }
     .gate-back:hover { color: #1c1a17; }
+    .board-note {
+      margin: 0;
+      padding: 1.15rem 1.2rem 1.2rem;
+      text-align: center;
+      background: #f4efe4;
+      border: 3px solid #1c1a17;
+      border-radius: 18px;
+      box-shadow: 4px 4px 0 #1c1a17;
+    }
+    .board-note h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .board-note ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.2rem;
+      font-weight: 600;
+    }
     .admin {
       width: min(880px, calc(100% - 2rem));
       margin: 0 auto;
@@ -211,14 +242,27 @@
 </head>
 <body>
   <div class="gate-screen" id="gate-screen">
-    <form id="gate" class="gate">
-      <h1>BLÜE BOY</h1>
-      <p class="gate-kicker">Artist access</p>
-      <input type="password" id="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required>
-      <button type="submit">Enter</button>
-      <p class="note" id="gate-notice"></p>
-      <a class="gate-back" href="/">Back to the site</a>
-    </form>
+    <div class="gate-layout">
+      <form id="gate" class="gate">
+        <h1>BLÜE BOY</h1>
+        <p class="gate-kicker">Artist access</p>
+        <input type="password" id="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required>
+        <button type="submit">Enter</button>
+        <p class="note" id="gate-notice"></p>
+        <a class="gate-back" href="/">Back to the site</a>
+      </form>
+      <aside class="board-note">
+        <h2>Board Members</h2>
+        <ul>
+          <li>John Gulbronson</li>
+          <li>Dean Clancy</li>
+          <li>Nathan Karinen</li>
+          <li>Ian Herdegen</li>
+          <li>Daniel Bloink</li>
+          <li>Escada Gordon</li>
+        </ul>
+      </aside>
+    </div>
   </div>
   <main class="admin" id="desk" hidden>
     <div class="admin-top">
@@ -263,6 +307,15 @@
         </div>
       </form>
       <div class="list" id="piece-list"></div>
+
+      <h2>Wishlist</h2>
+      <form id="wishlist-form" class="stack">
+        <div class="row">
+          <input id="wishlist-name" placeholder="Item" maxlength="80" required>
+          <button type="submit">Add item</button>
+        </div>
+      </form>
+      <div class="list" id="wishlist-list"></div>
   </main>
   <div class="cropper" id="cropper" hidden>
     <div class="cropper-card" role="dialog" aria-modal="true" aria-labelledby="crop-title">
@@ -292,6 +345,8 @@
     const desk = document.getElementById("desk");
     const logout = document.getElementById("logout");
     const artistList = document.getElementById("artist-list");
+    const wishlistList = document.getElementById("wishlist-list");
+    let wishlist = [];
     const pieceList = document.getElementById("piece-list");
     const artistSelect = document.getElementById("piece-artist");
     const collectionField = document.getElementById("collection-field");
@@ -804,6 +859,74 @@
 
     document.getElementById("piece-cancel").addEventListener("click", resetPiece);
 
+    document.getElementById("wishlist-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = document.getElementById("wishlist-name");
+      say("");
+      try {
+        const data = await api("/api/admin/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: input.value }),
+        });
+        input.value = "";
+        wishlist = data.items;
+        drawWishlist();
+      } catch (error) {
+        say(error.message);
+      }
+    });
+
+    function drawWishlist() {
+      wishlistList.replaceChildren();
+      wishlist.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "row";
+        const name = document.createElement("strong");
+        name.textContent = item.name;
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const rename = document.createElement("button");
+        rename.type = "button";
+        rename.className = "quiet";
+        rename.textContent = "Rename";
+        rename.addEventListener("click", async () => {
+          const next = prompt("Item", item.name);
+          if (!next || next.trim() === item.name) return;
+          say("");
+          try {
+            const data = await api("/api/admin/wishlist", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: item.id, name: next }),
+            });
+            wishlist = data.items;
+            drawWishlist();
+          } catch (error) {
+            say(error.message);
+          }
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "quiet";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", async () => {
+          if (!confirm("Remove " + item.name + " from the wishlist?")) return;
+          say("");
+          try {
+            const data = await api("/api/admin/wishlist?id=" + encodeURIComponent(item.id), { method: "DELETE" });
+            wishlist = data.items;
+            drawWishlist();
+          } catch (error) {
+            say(error.message);
+          }
+        });
+        actions.append(rename, remove);
+        row.append(name, actions);
+        wishlistList.appendChild(row);
+      });
+    }
+
     function resetPiece() {
       document.getElementById("piece-form").reset();
       document.getElementById("piece-id").value = "";
@@ -935,14 +1058,17 @@
     }
 
     async function refresh() {
-      const [artistData, pieceData] = await Promise.all([
+      const [artistData, pieceData, wishlistData] = await Promise.all([
         api("/api/admin/artists"),
         api("/api/admin/pieces"),
+        api("/api/admin/wishlist"),
       ]);
       artists = artistData.artists;
       catalog = pieceData.pieces;
+      wishlist = wishlistData.items;
       drawArtists();
       drawPieces(pieceData.pieces);
+      drawWishlist();
     }
 
     refresh().then(showDesk).catch(() => showGate());
