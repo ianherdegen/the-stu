@@ -1,6 +1,6 @@
-import { db, ensureSchema } from "../lib/db.js";
-import { requireAdmin } from "../lib/http.js";
-import { readStored } from "../lib/stored.js";
+import { db, ensureSchema } from "../../lib/db.js";
+import { requireAdmin } from "../../lib/http.js";
+import { readStored } from "../../lib/stored.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {

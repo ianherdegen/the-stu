@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import Busboy from "busboy";
 import { del, put } from "@vercel/blob";
-import { db, ensureSchema } from "../lib/db.js";
-import { cleanText, json, readJson, requireAdmin } from "../lib/http.js";
+import { db, ensureSchema } from "../../lib/db.js";
+import { cleanText, json, readJson, requireAdmin } from "../../lib/http.js";
 
 export const config = {
   api: { bodyParser: false },

@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { ensureSchema, db } from "./lib/db.js";
-import { json } from "./lib/http.js";
+import { ensureSchema, db } from "../lib/db.js";
+import { json } from "../lib/http.js";
 
 function publicImage(row) {
   if (!row.image_url) return "";

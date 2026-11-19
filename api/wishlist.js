@@ -1,5 +1,5 @@
-import { db, ensureSchema } from "./lib/db.js";
-import { json } from "./lib/http.js";
+import { db, ensureSchema } from "../lib/db.js";
+import { json } from "../lib/http.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {

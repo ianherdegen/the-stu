@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { db, ensureSchema } from "../lib/db.js";
-import { cleanText, json, readJson, requireAdmin } from "../lib/http.js";
+import { db, ensureSchema } from "../../lib/db.js";
+import { cleanText, json, readJson, requireAdmin } from "../../lib/http.js";
 
 export default async function handler(req, res) {
   if (!requireAdmin(req, res)) return;

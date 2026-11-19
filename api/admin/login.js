@@ -1,4 +1,4 @@
-import { clearSession, json, passwordsMatch, readJson, setSession } from "../lib/http.js";
+import { clearSession, json, passwordsMatch, readJson, setSession } from "../../lib/http.js";
 
 export default async function handler(req, res) {
   if (req.method === "DELETE") {

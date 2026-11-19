@@ -1,6 +1,6 @@
-import { db, ensureSchema } from "./lib/db.js";
-import { readStored } from "./lib/stored.js";
-import { watermark } from "./lib/watermark.js";
+import { db, ensureSchema } from "../lib/db.js";
+import { readStored } from "../lib/stored.js";
+import { watermark } from "../lib/watermark.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
