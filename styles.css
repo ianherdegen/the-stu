@@ -53,23 +53,23 @@ body {
 
 .title {
   margin: 0;
-  font-family: "Anybody", sans-serif;
-  font-weight: 800;
-  font-stretch: 128%;
-  font-size: clamp(2.7rem, 9vw, 7rem);
-  line-height: 0.86;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  color: #fff;
+}
+
+.title img {
+  display: block;
+  width: min(92vw, 680px);
+  height: auto;
+  margin: 0 auto;
+  filter: drop-shadow(0 3px 16px rgba(0, 0, 0, 0.55));
 }
 
 .subtitle {
-  margin: 0.85rem 0 0;
+  margin: 0.7rem 0 0;
   font-family: "Anybody", sans-serif;
   font-weight: 500;
   font-stretch: 108%;
-  font-size: clamp(1.05rem, 2.2vw, 1.55rem);
-  letter-spacing: 0.16em;
+  font-size: clamp(0.95rem, 2.1vw, 1.45rem);
+  letter-spacing: 0.14em;
   color: #fffdf8;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
 }
@@ -97,7 +97,7 @@ main {
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 0.95;
-  color: #00274c;
+  color: #053167;
   -webkit-text-stroke: 0.02em #1c1a17;
   paint-order: stroke fill;
 }
@@ -469,7 +469,7 @@ main {
   font-family: "Lilita One", sans-serif;
   font-size: clamp(3.2rem, 6vw, 4.4rem);
   line-height: 0.9;
-  color: #00274c;
+  color: #053167;
   -webkit-text-stroke: 0.015em #1c1a17;
   paint-order: stroke fill;
 }
@@ -540,7 +540,7 @@ main {
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #00274c;
+  color: #053167;
 }
 
 .day.is-open .day-name {
@@ -564,7 +564,8 @@ main {
 }
 
 .cal-event--art {
-  background: #9ecae9;
+  background: #053167;
+  color: #fffdf8;
 }
 
 .cal-time,
@@ -598,8 +599,12 @@ main {
 }
 
 .cal-note a {
-  color: #00274c;
+  color: #053167;
   font-weight: 600;
+}
+
+.cal-event--art a {
+  color: #fffdf8;
 }
 
 .cal-star {
