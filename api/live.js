@@ -105,8 +105,15 @@ async function fromPage() {
   };
 }
 
-function withDebug(body, debug, enabled) {
-  return enabled ? { ...body, debug } : body;
+function onAir(video, status) {
+  return {
+    live: true,
+    embeddable: Boolean(status?.embeddable),
+    videoId: video.videoId,
+    title: status?.title || video.title,
+    url: LIVE_URL,
+    thumbnail: video.thumbnail,
+  };
 }
 
 export default async function handler(req, res) {
@@ -115,50 +122,24 @@ export default async function handler(req, res) {
     return json(res, 405, { error: "Method not allowed." });
   }
 
-  const debugEnabled = req.query?.debug === "1";
-  const debug = { videos: [], broadcasts: [], page: null, error: null };
-
   try {
     const videos = await recentVideos();
-    debug.videos = videos.map((video) => video.videoId);
-    const checks = await Promise.all(videos.map(async (video) => {
-      try {
-        const status = await broadcast(video.videoId);
-        debug.broadcasts.push({ videoId: video.videoId, status });
-        return { video, status };
-      } catch (error) {
-        debug.broadcasts.push({ videoId: video.videoId, error: String(error) });
-        return { video, status: null };
-      }
-    }));
-    const hit = checks.find((item) => item.status?.live);
-    if (hit) {
-      return json(res, 200, withDebug({
-        live: true,
-        embeddable: hit.status.embeddable,
-        videoId: hit.video.videoId,
-        title: hit.status.title || hit.video.title,
-        url: LIVE_URL,
-        thumbnail: hit.video.thumbnail,
-      }, debug, debugEnabled));
-    }
-    if (checks.length && checks.every((item) => item.status?.known)) {
-      return json(res, 200, withDebug(OFF, debug, debugEnabled));
-    }
-    const page = await fromPage();
-    debug.page = page;
-    return json(res, 200, withDebug(page || OFF, debug, debugEnabled));
+    const checks = await Promise.all(videos.map(async (video) => ({
+      video,
+      status: await broadcast(video.videoId).catch(() => null),
+    })));
+    const hit = checks.find((item) => item.status?.live)
+      || checks.find((item) => item.status?.playability === "LOGIN_REQUIRED");
+    if (hit) return json(res, 200, onAir(hit.video, hit.status));
+    if (checks.length && checks.every((item) => item.status?.known)) return json(res, 200, OFF);
+    return json(res, 200, (await fromPage()) || OFF);
   } catch (error) {
-    debug.error = String(error);
     console.error(error);
     try {
-      const page = await fromPage();
-      debug.page = page;
-      return json(res, 200, withDebug(page || OFF, debug, debugEnabled));
+      return json(res, 200, (await fromPage()) || OFF);
     } catch (fallbackError) {
-      debug.pageError = String(fallbackError);
       console.error(fallbackError);
-      return json(res, 200, withDebug(OFF, debug, debugEnabled));
+      return json(res, 200, OFF);
     }
   }
 }
