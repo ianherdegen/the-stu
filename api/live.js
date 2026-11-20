@@ -43,12 +43,17 @@ async function recentVideos() {
   return videos;
 }
 
-async function broadcast(videoId) {
+const CLIENTS = [
+  { clientName: "MWEB", clientVersion: "2.20241120.01.00" },
+  { clientName: "WEB", clientVersion: "2.20241120.01.00" },
+];
+
+async function ask(videoId, client) {
   const response = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
     method: "POST",
     headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
     body: JSON.stringify({
-      context: { client: { clientName: "WEB", clientVersion: "2.20241120.01.00", hl: "en" } },
+      context: { client: { ...client, hl: "en" } },
       videoId,
     }),
     signal: AbortSignal.timeout(8000),
@@ -63,7 +68,19 @@ async function broadcast(videoId) {
     embeddable: status.playableInEmbed === true && status.status === "OK",
     title: data.videoDetails?.title || "",
     playability: status.status || "",
+    client: client.clientName,
   };
+}
+
+async function broadcast(videoId) {
+  let last = null;
+  for (const client of CLIENTS) {
+    const result = await ask(videoId, client);
+    if (!result) continue;
+    last = result;
+    if (result.known || result.live) return result;
+  }
+  return last;
 }
 
 async function fromPage() {
@@ -125,7 +142,9 @@ export default async function handler(req, res) {
         thumbnail: hit.video.thumbnail,
       }, debug, debugEnabled));
     }
-    if (checks.some((item) => item.status?.known)) return json(res, 200, withDebug(OFF, debug, debugEnabled));
+    if (checks.length && checks.every((item) => item.status?.known)) {
+      return json(res, 200, withDebug(OFF, debug, debugEnabled));
+    }
     const page = await fromPage();
     debug.page = page;
     return json(res, 200, withDebug(page || OFF, debug, debugEnabled));
