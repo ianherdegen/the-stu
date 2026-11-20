@@ -63,17 +63,6 @@ body {
   filter: drop-shadow(0 3px 16px rgba(0, 0, 0, 0.55));
 }
 
-.subtitle {
-  margin: 0.7rem 0 0;
-  font-family: "Anybody", sans-serif;
-  font-weight: 500;
-  font-stretch: 108%;
-  font-size: clamp(0.95rem, 2.1vw, 1.45rem);
-  letter-spacing: 0.14em;
-  color: #fffdf8;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
-}
-
 main {
   background: #fff;
   color: #1c1a17;
@@ -97,7 +86,7 @@ main {
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 0.95;
-  color: #053167;
+  color: #00274c;
   -webkit-text-stroke: 0.02em #1c1a17;
   paint-order: stroke fill;
 }
@@ -469,7 +458,7 @@ main {
   font-family: "Lilita One", sans-serif;
   font-size: clamp(3.2rem, 6vw, 4.4rem);
   line-height: 0.9;
-  color: #053167;
+  color: #00274c;
   -webkit-text-stroke: 0.015em #1c1a17;
   paint-order: stroke fill;
 }
@@ -540,7 +529,7 @@ main {
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #053167;
+  color: #00274c;
 }
 
 .day.is-open .day-name {
@@ -564,8 +553,7 @@ main {
 }
 
 .cal-event--art {
-  background: #053167;
-  color: #fffdf8;
+  background: #9ecae9;
 }
 
 .cal-time,
@@ -599,12 +587,8 @@ main {
 }
 
 .cal-note a {
-  color: #053167;
+  color: #00274c;
   font-weight: 600;
-}
-
-.cal-event--art a {
-  color: #fffdf8;
 }
 
 .cal-star {
@@ -752,9 +736,4 @@ main {
     font-stretch: 115%;
     letter-spacing: 0;
   }
-
-  .subtitle {
-    letter-spacing: 0.08em;
-  }
-
 }
