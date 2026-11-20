@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Fredoka:wght@500;600&family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=60">
+  <link rel="stylesheet" href="styles.css?v=62">
 </head>
 <body>
   <header class="hero">
@@ -34,8 +34,13 @@
     <section class="studio-block" aria-labelledby="live-heading">
       <div class="studio-inner">
         <h2 class="section-title" id="live-heading">STUDIO LIVESTREAM</h2>
-        <div class="live-stage">
-          <p>When we're live, the stream plays here.</p>
+        <div class="live-stage" id="live-stage">
+          <p id="live-note">When we're live, the stream plays here.</p>
+          <a class="live-watch" id="live-watch" hidden href="https://www.youtube.com/@ItsMilwaukeeMagic/live" target="_blank" rel="noopener noreferrer">
+            <img id="live-thumb" alt="">
+            <span class="live-badge">Live</span>
+            <span class="live-caption" id="live-caption"></span>
+          </a>
         </div>
       </div>
     </section>
@@ -426,8 +431,53 @@
       }
     }
 
+    async function loadLive() {
+      const stage = document.getElementById("live-stage");
+      const note = document.getElementById("live-note");
+      const watch = document.getElementById("live-watch");
+      try {
+        const response = await fetch("/api/live", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.live) {
+          note.hidden = false;
+          watch.hidden = true;
+          stage.querySelector(".live-frame")?.remove();
+          return;
+        }
+        note.hidden = true;
+        if (data.embeddable && data.videoId) {
+          watch.hidden = true;
+          const src = `https://www.youtube.com/embed/${data.videoId}?autoplay=1`;
+          let frame = stage.querySelector(".live-frame");
+          if (!frame) {
+            frame = document.createElement("iframe");
+            frame.className = "live-frame";
+            frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            frame.allowFullscreen = true;
+            frame.referrerPolicy = "strict-origin-when-cross-origin";
+            stage.appendChild(frame);
+          }
+          frame.title = data.title || "Milwaukee Magic live";
+          if (!frame.src.includes(data.videoId)) frame.src = src;
+          return;
+        }
+        stage.querySelector(".live-frame")?.remove();
+        watch.hidden = false;
+        watch.href = data.url || watch.href;
+        const thumb = document.getElementById("live-thumb");
+        if (thumb.src !== data.thumbnail) thumb.src = data.thumbnail;
+        thumb.alt = data.title || "Live now";
+        document.getElementById("live-caption").textContent = data.title || "Watch live";
+      } catch (error) {
+        note.hidden = false;
+      }
+    }
+
     loadArt();
     loadWishlist();
+    loadLive();
+    setInterval(loadLive, 60000);
   </script>
 </body>
 </html>
