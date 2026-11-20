@@ -59,8 +59,10 @@ async function broadcast(videoId) {
   const status = data.playabilityStatus || {};
   return {
     live: details?.isLiveNow === true,
+    known: typeof details?.isLiveNow === "boolean",
     embeddable: status.playableInEmbed === true && status.status === "OK",
     title: data.videoDetails?.title || "",
+    playability: status.status || "",
   };
 }
 
@@ -86,38 +88,58 @@ async function fromPage() {
   };
 }
 
+function withDebug(body, debug, enabled) {
+  return enabled ? { ...body, debug } : body;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return json(res, 405, { error: "Method not allowed." });
   }
 
+  const debugEnabled = req.query?.debug === "1";
+  const debug = { videos: [], broadcasts: [], page: null, error: null };
+
   try {
     const videos = await recentVideos();
-    const checks = await Promise.all(videos.map(async (video) => ({
-      video,
-      status: await broadcast(video.videoId).catch(() => null),
-    })));
+    debug.videos = videos.map((video) => video.videoId);
+    const checks = await Promise.all(videos.map(async (video) => {
+      try {
+        const status = await broadcast(video.videoId);
+        debug.broadcasts.push({ videoId: video.videoId, status });
+        return { video, status };
+      } catch (error) {
+        debug.broadcasts.push({ videoId: video.videoId, error: String(error) });
+        return { video, status: null };
+      }
+    }));
     const hit = checks.find((item) => item.status?.live);
     if (hit) {
-      return json(res, 200, {
+      return json(res, 200, withDebug({
         live: true,
         embeddable: hit.status.embeddable,
         videoId: hit.video.videoId,
         title: hit.status.title || hit.video.title,
         url: LIVE_URL,
         thumbnail: hit.video.thumbnail,
-      });
+      }, debug, debugEnabled));
     }
-    if (checks.some((item) => item.status)) return json(res, 200, OFF);
-    return json(res, 200, (await fromPage()) || OFF);
+    if (checks.some((item) => item.status?.known)) return json(res, 200, withDebug(OFF, debug, debugEnabled));
+    const page = await fromPage();
+    debug.page = page;
+    return json(res, 200, withDebug(page || OFF, debug, debugEnabled));
   } catch (error) {
+    debug.error = String(error);
     console.error(error);
     try {
-      return json(res, 200, (await fromPage()) || OFF);
+      const page = await fromPage();
+      debug.page = page;
+      return json(res, 200, withDebug(page || OFF, debug, debugEnabled));
     } catch (fallbackError) {
+      debug.pageError = String(fallbackError);
       console.error(fallbackError);
-      return json(res, 200, OFF);
+      return json(res, 200, withDebug(OFF, debug, debugEnabled));
     }
   }
 }
