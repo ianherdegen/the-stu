@@ -446,7 +446,7 @@
           return;
         }
         note.hidden = true;
-        if (data.embeddable && data.videoId) {
+        if (data.videoId) {
           watch.hidden = true;
           const src = `https://www.youtube.com/embed/${data.videoId}?autoplay=1`;
           let frame = stage.querySelector(".live-frame");
