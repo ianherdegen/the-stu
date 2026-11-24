@@ -90,7 +90,9 @@ body {
 
 .partnership {
   margin: 0;
-  padding: 0.65rem 1.25rem;
+  padding: 0.55rem 1.25rem;
+  display: grid;
+  gap: 0.1rem;
   text-align: center;
   background: #a8d2ff;
   color: #1c1a17;
@@ -98,6 +100,10 @@ body {
   font-weight: 500;
   font-size: 0.92rem;
   line-height: 1.35;
+}
+
+.partnership-line {
+  display: block;
 }
 
 .partnership-name {
@@ -109,10 +115,6 @@ body {
   width: auto;
   margin-right: 0.2em;
   vertical-align: -0.22em;
-}
-
-.partnership-tail {
-  white-space: nowrap;
 }
 
 main {
@@ -478,6 +480,20 @@ main {
   margin: 0.4rem 0 0;
   font-size: 0.98rem;
   line-height: 1.4;
+}
+
+.member-apply,
+.art-sales {
+  margin: -1.35rem 0 2rem;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.member-apply a,
+.art-sales a {
+  color: #00274c;
+  text-underline-offset: 0.16em;
 }
 
 .member-layout {
