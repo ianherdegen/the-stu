@@ -54,43 +54,65 @@ body {
 .title {
   margin: 0;
   width: min(92vw, 920px);
-  display: grid;
-  justify-items: center;
-  gap: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18em;
+  font-size: clamp(2.8rem, 11vw, 6.4rem);
   color: #fffdf8;
   text-shadow: 0 3px 18px rgba(0, 0, 0, 0.7);
 }
 
-.title-name,
-.title-place {
+.title-name {
   display: block;
   max-width: 100%;
   font-family: "Anybody", sans-serif;
   font-weight: 800;
   font-stretch: 82%;
-  line-height: 0.9;
+  font-size: 1em;
+  line-height: 0.92;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.title-name {
-  font-size: clamp(1.7rem, 6.4vw, 4.15rem);
-}
-
-.title-place {
-  font-size: clamp(1.15rem, 3.7vw, 2.4rem);
-}
-
 .title-at {
+  display: block;
+  margin: 0;
   font-family: "Fredoka", sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   font-stretch: 100%;
-  font-size: 0.58em;
-  letter-spacing: 0.16em;
+  font-size: 0.22em;
+  line-height: 1;
+  letter-spacing: 0.22em;
   text-transform: lowercase;
-  margin-right: 0.32em;
-  vertical-align: 0.08em;
+}
+
+.partnership {
+  margin: 0;
+  padding: 0.65rem 1.25rem;
+  text-align: center;
+  background: #a8d2ff;
+  color: #1c1a17;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 500;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.partnership-name {
+  white-space: nowrap;
+}
+
+.partnership-mark {
+  height: 1.15em;
+  width: auto;
+  margin-right: 0.2em;
+  vertical-align: -0.22em;
+}
+
+.partnership-tail {
+  white-space: nowrap;
 }
 
 main {
@@ -819,9 +841,12 @@ main {
 }
 
 @media (max-width: 520px) {
-  .title-name,
-  .title-place {
+  .title-name {
     font-stretch: 78%;
     letter-spacing: 0.01em;
+  }
+
+  .title {
+    gap: 0.16em;
   }
 }
