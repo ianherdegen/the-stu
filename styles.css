@@ -53,25 +53,44 @@ body {
 
 .title {
   margin: 0;
-}
-
-.title img {
-  display: block;
-  width: min(92vw, 680px);
-  height: auto;
-  margin: 0 auto;
-  filter: drop-shadow(0 3px 16px rgba(0, 0, 0, 0.55));
-}
-
-.subtitle {
-  margin: 0.55rem 0 0;
-  font-family: "Anybody", sans-serif;
-  font-weight: 500;
-  font-stretch: 108%;
-  font-size: clamp(0.95rem, 2.1vw, 1.45rem);
-  letter-spacing: 0.14em;
+  width: min(92vw, 920px);
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
   color: #fffdf8;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.7);
+}
+
+.title-name,
+.title-place {
+  display: block;
+  max-width: 100%;
+  font-family: "Anybody", sans-serif;
+  font-weight: 800;
+  font-stretch: 82%;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.title-name {
+  font-size: clamp(1.7rem, 6.4vw, 4.15rem);
+}
+
+.title-place {
+  font-size: clamp(1.15rem, 3.7vw, 2.4rem);
+}
+
+.title-at {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: 0.58em;
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
+  margin-right: 0.32em;
+  vertical-align: 0.08em;
 }
 
 main {
@@ -800,8 +819,9 @@ main {
 }
 
 @media (max-width: 520px) {
-  .title {
-    font-stretch: 115%;
-    letter-spacing: 0;
+  .title-name,
+  .title-place {
+    font-stretch: 78%;
+    letter-spacing: 0.01em;
   }
 }
